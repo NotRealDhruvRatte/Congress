@@ -1,798 +1,730 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>India Governance Report Card</title>
-    <style>
-        :root {
-            /* Apple Dark Mode Palette */
-            --bg-color: #000000;
-            --bg-secondary: #1C1C1E;
-            --bg-tertiary: #2C2C2E;
-            --text-primary: #F5F5F7;
-            --text-secondary: #86868B;
-            --border-color: #38383A;
-            --bjp-color: #FF9F0A; /* Apple Orange mapped to BJP */
-            --bjp-bg: rgba(255, 159, 10, 0.15);
-            --cong-color: #0A84FF; /* Apple Blue mapped to Congress */
-            --cong-bg: rgba(10, 132, 255, 0.15);
-            --tie-color: #8E8E93;
-            --tie-bg: rgba(142, 142, 147, 0.15);
-            --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: var(--font-family);
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        svg {
-            display: inline-block;
-            vertical-align: middle;
-        }
-
-        /* Glassmorphism Header */
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(28, 28, 30, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 32px 20px;
-            text-align: center;
-        }
-
-        .header-tags {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .tag {
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .tag.bjp { background-color: var(--bjp-color); color: #000; }
-        .tag.cong { background-color: var(--cong-color); color: #fff; }
-        .vs { color: var(--text-secondary); font-size: 18px; font-weight: 400; }
-
-        h1 {
-            font-size: clamp(24px, 4vw, 40px);
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 8px;
-            background: linear-gradient(90deg, #FF9F0A, #FF375F, #0A84FF);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .header-desc { color: var(--text-secondary); font-size: 15px; margin-bottom: 4px; }
-        .header-sources { color: #636366; font-size: 12px; }
-
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px 16px;
-        }
-
-        /* Notice Card */
-        .notice-card {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            font-size: 13px;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-        .notice-card-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-        .notice-card strong { color: var(--text-primary); }
-
-        /* Scoreboard */
-        .scoreboard {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 32px;
-        }
-
-        .score-card {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 20px 32px;
-            text-align: center;
-            min-width: 180px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-            transition: transform 0.2s;
-        }
-        .score-card:hover { transform: translateY(-2px); }
-        .score-val { font-size: 48px; font-weight: 800; margin-bottom: 4px; }
-        .score-label { font-size: 13px; color: var(--text-secondary); font-weight: 600;}
-        .score-sub { font-size: 12px; color: #636366; margin-top: 4px; }
-
-        /* Filter Buttons */
-        .filters {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: transparent;
-            border: 2px solid var(--border-color);
-            color: var(--text-primary);
-            border-radius: 20px;
-            padding: 8px 20px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            font-family: var(--font-family);
-        }
-
-        .btn:hover { background: var(--bg-tertiary); }
-        .btn.active-ALL { background: var(--text-secondary); color: #000; border-color: var(--text-secondary); }
-        .btn.active-NDA { background: var(--bjp-color); color: #000; border-color: var(--bjp-color); }
-        .btn.active-UPA { background: var(--cong-color); color: #fff; border-color: var(--cong-color); }
-        .btn.active-TIE { background: var(--tie-color); color: #000; border-color: var(--tie-color); }
-
-        /* Summary Toggle */
-        .toggle-container { text-align: center; margin-bottom: 24px; }
-        .btn-toggle {
-            display: inline-flex;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            color: var(--cong-color);
-        }
-        .btn-toggle:hover { border-color: var(--cong-color); }
-
-        /* Sections & Tables */
-        .section-card { margin-bottom: 40px; }
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 12px;
-            flex-wrap: wrap;
-        }
-        .section-header h2 { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; }
-        .section-stats { display: flex; gap: 8px; margin-left: auto; }
-        .stat-badge {
-            font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 8px;
-        }
-
-        .table-container {
-            background-color: var(--bg-secondary);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            overflow-x: auto;
-        }
-
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th {
-            background-color: var(--bg-tertiary);
-            color: var(--text-secondary);
-            font-size: 12px;
-            font-weight: 600;
-            padding: 14px 16px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        td {
-            padding: 16px;
-            font-size: 13px;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: top;
-            color: var(--text-primary);
-            line-height: 1.5;
-        }
-        tr:last-child td { border-bottom: none; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>India Governance Report Card</title>
+<meta name="description" content="Comprehensive analysis of 79 governance indicators comparing BJP/NDA and Congress/UPA.">
+<style>
+    /* ── BASE & VARIABLES ── */
+    :root {
+        /* Light Theme (Default) */
+        --bg-body: #F5F5F7;
+        --bg-card: #FFFFFF;
+        --bg-card-hover: #F8F8F9;
+        --bg-glass: rgba(255, 255, 255, 0.85);
+        --text-main: #1D1D1F;
+        --text-muted: #86868B;
+        --text-inverse: #FFFFFF;
+        --border: rgba(0, 0, 0, 0.08);
+        --border-heavy: rgba(0, 0, 0, 0.15);
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+        --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
         
-        .data-row { cursor: pointer; transition: background 0.2s; }
-        .data-row:hover { background-color: var(--bg-tertiary); }
-        .data-title-cell { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;}
+        /* Brand Colors */
+        --bjp: #F56200;
+        --bjp-bg: rgba(245, 98, 0, 0.1);
+        --con: #007AFF;
+        --con-bg: rgba(0, 122, 255, 0.1);
+        --tie: #8E8E93;
+        --tie-bg: rgba(142, 142, 147, 0.1);
+        --gold: #F59E0B;
+        --green: #34C759;
         
-        .winner-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            text-align: center;
-        }
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --radius-xl: 28px;
+        --radius-full: 999px;
+        
+        --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        --transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
 
-        .tip-text {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px; 
-            color: var(--text-secondary); 
-            margin-top: 8px;
-        }
+    [data-theme="dark"] {
+        --bg-body: #000000;
+        --bg-card: #1C1C1E;
+        --bg-card-hover: #2C2C2E;
+        --bg-glass: rgba(28, 28, 30, 0.85);
+        --text-main: #F5F5F7;
+        --text-muted: #A1A1A6;
+        --border: rgba(255, 255, 255, 0.1);
+        --border-heavy: rgba(255, 255, 255, 0.2);
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.6);
+        --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.8);
+    }
 
-        /* Overall Verdict Card */
-        .verdict-card {
-            background: linear-gradient(145deg, #1C1C1E, #121214);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 32px;
-            margin-bottom: 40px;
-        }
-        .verdict-card h2 { display: flex; align-items: center; gap: 12px; font-size: 24px; margin-bottom: 24px; }
-        .verdict-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-        .verdict-box {
-            background-color: rgba(255,255,255,0.03);
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid var(--border-color);
-        }
-        .verdict-box h3 { display: flex; align-items: center; gap: 8px; font-size: 16px; margin-bottom: 12px; }
-        .verdict-box ul { padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.8; }
-        .verdict-conclusion {
-            margin-top: 24px;
-            padding: 16px 20px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+        font-family: var(--font-stack);
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-        /* Footer Note */
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            border-top: 1px solid var(--border-color);
-            margin-top: 40px;
-        }
-        .user-note {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 16px 24px;
-            border-radius: 16px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #E5E5EA;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
+    svg { display: inline-block; vertical-align: middle; flex-shrink: 0; }
+    button { font-family: inherit; cursor: pointer; border: none; outline: none; background: none; }
+    
+    /* ── READING PROGRESS ── */
+    #progress-bar {
+        position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+        background: linear-gradient(90deg, var(--bjp), var(--con));
+        z-index: 1000; transition: width 0.1s;
+    }
 
-    </style>
+    /* ── NAVBAR (FEATURES) ── */
+    .top-nav {
+        position: fixed; top: 0; width: 100%; z-index: 999;
+        background: var(--bg-glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+        border-bottom: 1px solid var(--border); padding: 12px 24px;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .nav-brand { font-weight: 700; font-size: 15px; letter-spacing: -0.2px; display: flex; align-items: center; gap: 8px;}
+    .nav-actions { display: flex; gap: 12px; }
+    .icon-btn {
+        display: flex; align-items: center; justify-content: center;
+        width: 36px; height: 36px; border-radius: 50%;
+        background: var(--border); color: var(--text-main);
+        transition: var(--transition);
+    }
+    .icon-btn:hover { background: var(--border-heavy); transform: scale(1.05); }
+
+    /* ── LAYOUT ── */
+    .layout-wrapper { display: flex; max-width: 1400px; margin: 60px auto 0; padding: 0 24px; gap: 40px; }
+    
+    /* SIDEBAR */
+    .sidebar { width: 260px; flex-shrink: 0; position: sticky; top: 100px; height: calc(100vh - 120px); overflow-y: auto; padding-right: 16px; display: none; }
+    @media (min-width: 1024px) { .sidebar { display: block; } }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border-heavy); border-radius: 4px; }
+    .nav-link {
+        display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+        border-radius: var(--radius-sm); color: var(--text-muted);
+        font-size: 13px; font-weight: 600; transition: var(--transition); text-decoration: none;
+    }
+    .nav-link:hover { background: var(--bg-card); color: var(--text-main); }
+    .nav-link.active { background: var(--bg-card); color: var(--con); box-shadow: var(--shadow-sm); }
+
+    /* MAIN CONTENT */
+    .main-content { flex: 1; min-width: 0; padding-bottom: 80px; }
+
+    /* ── HERO ── */
+    .hero { text-align: center; padding: 60px 0 40px; position: relative; }
+    .hero-tags { display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .hero-pill { padding: 6px 16px; border-radius: var(--radius-full); font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+    .pill-bjp { background: var(--bjp); color: white; box-shadow: 0 4px 12px rgba(245, 98, 0, 0.3); }
+    .pill-con { background: var(--con); color: white; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3); }
+    .pill-vs { font-size: 14px; color: var(--text-muted); font-style: italic; }
+    .hero h1 { font-size: clamp(32px, 5vw, 56px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 16px; }
+    .hero p { font-size: 16px; color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+
+    /* ── SEARCH & TOOLBAR ── */
+    .toolbar {
+        background: var(--bg-card); border-radius: var(--radius-lg); padding: 16px;
+        box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+        margin-bottom: 32px; display: flex; flex-direction: column; gap: 16px;
+        position: sticky; top: 70px; z-index: 90;
+    }
+    .search-box {
+        display: flex; align-items: center; gap: 12px; background: var(--bg-body);
+        padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border);
+    }
+    .search-box input {
+        border: none; background: none; outline: none; width: 100%;
+        font-size: 15px; color: var(--text-main); font-family: inherit;
+    }
+    .filter-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .f-btn {
+        padding: 8px 16px; border-radius: var(--radius-full); font-size: 13px; font-weight: 600;
+        border: 1px solid var(--border); color: var(--text-muted); transition: var(--transition); background: var(--bg-card);
+    }
+    .f-btn:hover { border-color: var(--text-main); color: var(--text-main); }
+    .f-btn.active-ALL { background: var(--text-main); color: var(--bg-card); border-color: var(--text-main); }
+    .f-btn.active-NDA { background: var(--bjp); color: white; border-color: var(--bjp); }
+    .f-btn.active-UPA { background: var(--con); color: white; border-color: var(--con); }
+    .f-btn.active-TIE { background: var(--tie); color: white; border-color: var(--tie); }
+    .tool-actions { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .text-btn { font-size: 13px; font-weight: 600; color: var(--con); display: flex; align-items: center; gap: 6px; }
+    .text-btn:hover { opacity: 0.8; }
+
+    /* ── SCOREBOARD ── */
+    .scoreboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 40px; }
+    .sc-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 24px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); text-align: center; }
+    .sc-num { font-size: 48px; font-weight: 800; line-height: 1; letter-spacing: -2px; margin-bottom: 8px; }
+    .sc-lbl { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .sc-bar-wrap { width: 100%; height: 6px; background: var(--border); border-radius: 3px; margin-top: 16px; overflow: hidden; }
+    .sc-bar { height: 100%; border-radius: 3px; }
+
+    /* ── DATA GRID (Replacing Tables) ── */
+    .section-block { margin-bottom: 48px; scroll-margin-top: 180px; }
+    .sec-hd { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .sec-hd h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .sec-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: var(--radius-sm); margin-left: auto; background: var(--border); }
+    
+    .grid-container { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .grid-header { display: grid; grid-template-columns: 40px 1fr 1fr 100px; gap: 16px; background: var(--bg-body); padding: 12px 20px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+    
+    .grid-row { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); transition: background 0.2s; cursor: pointer; }
+    .grid-row:last-child { border-bottom: none; }
+    .grid-row:hover { background: var(--bg-card-hover); }
+    
+    .row-main { display: grid; grid-template-columns: 40px 1fr 1fr 100px; gap: 16px; padding: 20px; align-items: start; }
+    .col-id { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+    .col-title { font-size: 15px; font-weight: 600; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; line-height: 1.3;}
+    .col-text { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .col-text.upa { color: #005bb5; }
+    .col-text.nda { color: #cc5200; }
+    [data-theme="dark"] .col-text.upa { color: #64D2FF; }
+    [data-theme="dark"] .col-text.nda { color: #FFD60A; }
+    .col-badge { text-align: right; }
+    
+    .winner-pill { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+    .wp-nda { background: var(--bjp-bg); color: var(--bjp); border: 1px solid var(--bjp); }
+    .wp-upa { background: var(--con-bg); color: var(--con); border: 1px solid var(--con); }
+    .wp-tie { background: var(--tie-bg); color: var(--tie); border: 1px solid var(--tie); }
+
+    .row-detail { display: grid; grid-template-rows: 0fr; transition: var(--transition); opacity: 0; }
+    .row-detail-inner { overflow: hidden; padding: 0 20px; }
+    .grid-row.expanded .row-detail { grid-template-rows: 1fr; opacity: 1; }
+    .grid-row.expanded .row-detail-inner { padding: 0 20px 20px; }
+    
+    .detail-card { background: var(--bg-body); border-radius: var(--radius-md); padding: 16px; border: 1px solid var(--border); }
+    .detail-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+    .detail-reason { font-size: 14px; font-weight: 500; line-height: 1.6; margin-bottom: 16px; }
+    .detail-split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-top: 1px solid var(--border); padding-top: 16px; }
+    .detail-split > div { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    .chevron { transition: transform 0.3s; color: var(--text-muted); }
+    .grid-row.expanded .chevron { transform: rotate(180deg); }
+    
+    /* Highlight class for search */
+    .highlight { background-color: rgba(245, 158, 11, 0.3); border-radius: 2px; padding: 0 2px; }
+
+    /* ── VERDICT & NOTE ── */
+    .verdict-box { background: var(--bg-card); border-radius: var(--radius-xl); padding: 40px; margin: 60px 0; border: 1px solid var(--border); box-shadow: var(--shadow-md); }
+    .v-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 24px; }
+    .v-card { padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--bg-body); }
+    .v-card h3 { font-size: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .v-card ul { padding-left: 20px; font-size: 13px; color: var(--text-muted); line-height: 1.8; }
+    .v-conc { margin-top: 24px; padding: 20px; background: var(--border); border-radius: var(--radius-md); font-size: 14px; line-height: 1.6; }
+
+    .personal-note { text-align: center; padding: 60px 24px; margin: 40px 0; border-radius: var(--radius-xl); background: linear-gradient(135deg, var(--bg-card), var(--bg-body)); border: 1px solid var(--border); position: relative; overflow: hidden; }
+    .note-flag { position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #FF9933 33%, #FFFFFF 33% 66%, #138808 66%); }
+    .personal-note p { font-size: 16px; font-weight: 500; max-width: 600px; margin: 20px auto; color: var(--text-muted); }
+    .slogan { display: flex; justify-content: center; gap: 16px; font-size: 20px; font-weight: 800; margin-top: 24px; }
+
+    /* ── MOBILE RESPONSIVE ── */
+    @media (max-width: 768px) {
+        .layout-wrapper { padding: 0 16px; margin-top: 80px; }
+        .grid-header { display: none; }
+        .row-main { grid-template-columns: 1fr; gap: 8px; padding: 16px; }
+        .col-id { display: none; }
+        .col-text { display: none; } /* Hide snippets on mobile, rely on expansion */
+        .col-badge { text-align: left; margin-top: 4px; }
+        .detail-split { grid-template-columns: 1fr; }
+        .sc-num { font-size: 36px; }
+        .verdict-box { padding: 24px; }
+        .tool-actions { flex-direction: column; align-items: flex-start; }
+    }
+</style>
 </head>
 <body>
+    <div id="progress-bar"></div>
 
-    <header>
-        <div class="header-tags">
-            <span class="tag bjp">BJP / NDA 2014–2024</span>
-            <span class="vs">vs</span>
-            <span class="tag cong">Congress / UPA 2004–2014</span>
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--con)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            Governance Report
         </div>
-        <h1>India Governance Report Card: 79 Categories</h1>
-        <p class="header-desc">Comprehensive, source-backed, unbiased analysis of key government performance indicators</p>
-        <p class="header-sources">Sources: World Bank, NSSO/PLFS, RBI, MHA, NCRB, RSF, SATP, NFHS, DPIIT, CAG, PIB, CMIE, ADB, IMF</p>
-    </header>
-
-    <main>
-        <div class="notice-card">
-            <div class="notice-card-header">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD60A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                    <line x1="12" y1="9" x2="12" y2="13"></line>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-                <strong style="color: #FFD60A; font-size: 14px;">IMPORTANT CONTEXT:</strong>
-            </div>
-            <strong>UPA era (2004-2014)</strong> benefited from a global economic boom pre-2008 (world GDP growth ~5.6%). 
-            <strong>NDA era (2014-2024)</strong> was impacted by COVID-19 pandemic (-7.3% GDP in FY21) and lower global growth (~4%). Many NDA welfare achievements build directly on UPA foundations (MGNREGA, Aadhaar, RTI, NRHM). GDP back-series data is contested. Winner determinations use best available objective data and note where comparison is disputed.
-        </div>
-
-        <div class="scoreboard" id="scoreboard"></div>
-        <div class="filters" id="filters"></div>
-        
-        <div class="toggle-container">
-            <button class="btn btn-toggle" id="toggleSummaryBtn">
-                <svg id="toggleIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-                <span id="toggleText">Show 10-Category Summary Table</span>
+        <div class="nav-actions">
+            <button class="icon-btn" id="btn-export" title="Export CSV" aria-label="Export CSV">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             </button>
-        </div>
-        
-        <div id="summary-container" style="display: none;"></div>
-        <div id="sections-container"></div>
-
-        <div class="verdict-card">
-            <h2>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                </svg>
-                Overall Verdict (Unbiased Assessment)
-            </h2>
-            <div class="verdict-grid">
-                <div class="verdict-box" style="border-color: var(--bjp-color);">
-                    <h3 style="color: var(--bjp-color);">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"></circle></svg>
-                        BJP/NDA Strengths (52 categories)
-                    </h3>
-                    <ul>
-                        <li>Infrastructure: Highways, airports, metro, railways</li>
-                        <li>Inflation control: CPI 5.1% vs UPA's 8.1%</li>
-                        <li>National security: 80% less terrorism deaths</li>
-                        <li>Welfare delivery: Electricity, toilets, water, Ayushman</li>
-                        <li>Economy size: 10th to 5th globally</li>
-                        <li>FDI: $596B vs $306B</li>
-                        <li>Digitisation: UPI, DBT, JAM Trinity</li>
-                        <li>Renewable energy: 7x capacity growth</li>
-                        <li>Foreign policy: G20, Quad, global influence</li>
-                        <li>Ease of Business: 142 to 63 rank</li>
-                    </ul>
-                </div>
-                <div class="verdict-box" style="border-color: var(--cong-color);">
-                    <h3 style="color: var(--cong-color);">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"></circle></svg>
-                        Congress/UPA Strengths (7 categories)
-                    </h3>
-                    <ul>
-                        <li>Press freedom: Better RSF rankings (120 vs 157)</li>
-                        <li>Internet shutdowns: Minimal vs world's highest under NDA</li>
-                        <li>Freedom of expression: Fewer political prosecutions</li>
-                        <li>Real wage growth: Better rural wages 2006-2012</li>
-                        <li>MMR reduction: Faster rate under NRHM</li>
-                        <li>Debt-to-GDP: Lower average government debt</li>
-                        <li>Political funding: More transparent than Electoral Bonds</li>
-                    </ul>
-                </div>
-                <div class="verdict-box" style="border-color: var(--tie-color);">
-                    <h3 style="color: var(--tie-color);">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"></circle></svg>
-                        Important Caveats (20 ties)
-                    </h3>
-                    <ul>
-                        <li>GDP: UPA benefited from global boom; NDA hit by COVID</li>
-                        <li>NDA welfare builds on UPA's MGNREGA, Aadhaar, NRHM</li>
-                        <li>Unemployment data methodology changed; not directly comparable</li>
-                        <li>Poverty data contested; World Bank estimates disputed</li>
-                        <li>Learning outcomes poor under both governments</li>
-                        <li>Air quality worsened under both; only measurement improved</li>
-                        <li>Caste violence: Higher numbers may mean better reporting</li>
-                        <li>Judicial independence concerns under both governments</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="verdict-conclusion">
-                <strong style="color: var(--text-primary);">Balanced Conclusion:</strong> On <strong style="color: var(--bjp-color);">quantitative developmental indicators</strong> — infrastructure, inflation, poverty reduction, national security, and welfare delivery — the BJP/NDA government (2014-2024) outperforms the Congress/UPA government on the majority of the 79 metrics analysed. However, on <strong style="color: var(--cong-color);">democratic health indicators</strong> — press freedom, internet shutdowns, freedom of expression, and political funding transparency — the record is significantly worse under NDA, representing a concerning democratic backslide. Both governments had genuine achievements; the UPA foundations in MGNREGA, NRHM, Aadhaar, and RTI were indispensable to NDA's later welfare gains.
-            </div>
-        </div>
-
-        <footer>
-            <div class="user-note">
-                Iam not a supporter for BJP, but iam against Congress, Jai Hind Jai Bharat Jai shree ram
-            </div>
-        </footer>
-    </main>
-
-    <script>
-        // SF Symbol style icons mapping
-        const SVG_ICONS = {
-            "ECONOMY": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`,
-            "JOBS & INCOME": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`,
-            "INFLATION & COST OF LIVING": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`,
-            "POVERTY & WELFARE": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`,
-            "INFRASTRUCTURE": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>`,
-            "EDUCATION": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`,
-            "HEALTHCARE": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>`,
-            "NATIONAL SECURITY": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
-            "CORRUPTION & GOVERNANCE": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><path d="M3 7h18"></path><path d="M6 7l-3 7s1 2 3 2 3-2 3-2l-3-7"></path><path d="M18 7l-3 7s1 2 3 2 3-2 3-2l-3-7"></path></svg>`,
-            "LAW & ORDER": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
-            "FOREIGN POLICY": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`,
-            "DEMOCRACY & CIVIL LIBERTIES": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>`,
-            "SOCIAL HARMONY": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
-            "ENVIRONMENT": `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg>`
-        };
-
-        const SVGS = {
-            CHEVRON_DOWN: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`,
-            CHEVRON_UP: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>`,
-            CHEVRON_RIGHT: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
-            BAR_CHART: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`,
-            INFO: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`
-        };
-
-        const SECTIONS = [
-          {
-            section: "ECONOMY",
-            items: [
-              { id: 1, name: "GDP Growth Rate", upa: "Avg ~7.6% (old series) / 6.8% (new series); UPA-I: 8.1%, UPA-II: 5.9%; Benefited from pre-2008 global boom (world GDP growth ~5.6%)", nda: "Avg ~6% (incl. COVID) / 6.8% (excl. COVID-19 FY21); Best year 8.2% (FY24). COVID caused -7.3% in FY21; global growth was only 4% during NDA era", winner: "TIE", reason: "UPA had marginally higher absolute avg, but NDA outperformed on 'excess growth over global average' (2.9pp vs 2.2pp). COVID massively distorted NDA data. Both averaged ~6.8% in comparable conditions." },
-              { id: 2, name: "GDP Per Capita", upa: "Grew from ~$635 (2004) to ~$1,573 (2014) — ~148% increase in nominal USD. Real incomes improved significantly during boom years.", nda: "Grew from ~$1,573 (2014) to ~$2,731 (2024) — ~74% increase in nominal USD. Per capita ₹98,118 in real terms (2011-12 base) vs ₹1,72,000 nominal", winner: "TIE", reason: "UPA's percentage growth was higher from a lower base with more favorable global conditions. NDA added more absolute dollar value. Comparison across different bases is not directly fair." },
-              { id: 3, name: "Size of Economy (Global Rank)", upa: "India moved from 13th (2004, ~$700B) to 10th largest economy (2014, ~$2.1T). Crossed Brazil and Russia.", nda: "India moved from 10th (2014, ~$2.1T) to 5th largest economy (2024, ~$3.9T). Surpassed UK and France. Projected to reach 3rd place by 2027.", winner: "NDA", reason: "India's leap from 10th to 5th globally is a major milestone. Doubling of absolute GDP from $2.1T to $3.9T under NDA is a significant achievement despite COVID." },
-              { id: 4, name: "Manufacturing Growth", upa: "Manufacturing grew ~5-7% annually; IIP fluctuated. Deindustrialisation concerns rose in UPA-II. Share of manufacturing in GDP ~14-15%.", nda: "PLI scheme (₹2 lakh cr incentives across 14 sectors); Make in India; mobile phone manufacturing grew 20x; defense exports up 30x. Mfg share ~16-17%.", winner: "NDA", reason: "PLI scheme delivered measurable results in electronics, pharmaceuticals, and defense. Mobile manufacturing rose from near zero to $15B+ exports under NDA." },
-              { id: 5, name: "Exports Growth", upa: "Goods exports grew ~69% over 10 years ($83B to $313B). Services exports also grew. Export growth was strong but decelerating by UPA-II.", nda: "Services exports: $305B (UPA era) → $709B (NDA era, 2014-24). Goods exports: ~$435B in 2023-24. India became $1 trillion merchandise+services exporter.", winner: "NDA", reason: "Total merchandise+services exports crossed $1T under NDA. Services exports more than doubled. However, goods export growth was faster in % terms under UPA." },
-              { id: 6, name: "Foreign Direct Investment (FDI)", upa: "Total gross FDI inflows: ~$306 billion over 10 years (2004-2014). Peaked after nuclear deal; declined in UPA-II.", nda: "Total gross FDI inflows: ~$596 billion over 10 years (2014-2024). H1FY25: $42.1B (+25.7% YoY). India among top 3 global FDI destinations.", winner: "NDA", reason: "FDI nearly doubled under NDA vs UPA decade. Ease of doing business reforms, FDI policy liberalisation in 100+ sectors, and DPIIT reforms drove the surge." },
-              { id: 7, name: "Fiscal Deficit (% of GDP)", upa: "Peaked at 6.6% (2009-10) due to stimulus; avg UPA-II: ~5.9%. Came down to 4.5% by 2013-14 under pressure. High deficits fuelled inflation.", nda: "Avg ~3.7% (pre-COVID). COVID spike to 9.2% (FY21); recovered to 5.8% (FY22) → 5.1% (FY24) → targeting 4.5% (FY26). FRBM compliance improved.", winner: "NDA", reason: "Pre-COVID fiscal consolidation under NDA was clearly better. Despite COVID spike, NDA managed faster fiscal correction. UPA II's sustained deficits contributed to high inflation." },
-              { id: 8, name: "Government Debt-to-GDP Ratio", upa: "General government debt: ~75-78% of GDP. Relatively stable with some reduction from early 2000s high levels.", nda: "General government debt: ~80-85% of GDP. Increased significantly due to COVID stimulus. Higher than UPA era levels.", winner: "UPA", reason: "On this metric alone, UPA maintained lower debt-to-GDP. NDA's COVID response and welfare spending pushed debt higher, though debt management remains broadly acceptable." },
-              { id: 9, name: "Tax Collection Growth", upa: "Direct taxes grew from ₹1.82L cr (FY05) to ₹6.96L cr (FY14). Tax-to-GDP ratio ~10%. Black money economy remained large.", nda: "GST introduced (2017); total tax collections grew to ₹34+ lakh cr (FY24); Income Tax filers increased from 3.5cr to 9.3cr; Tax-to-GDP ratio improved to ~11-12%.", winner: "NDA", reason: "GST transformed indirect tax, adding millions to the tax net. Demonetisation (though controversial) pushed people toward formal channels. Tax collections grew 4x under NDA." },
-              { id: 10, name: "Ease of Doing Business", upa: "India ranked 134th in 2013 (World Bank EODB). Limited reforms; bureaucratic red tape; project clearances very slow.", nda: "India improved from 142nd (2014) to 63rd (2019-20) — a 79-place jump. World Bank named India Top 10 Improver for 3 consecutive years. Index discontinued in 2021.", winner: "NDA", reason: "One of NDA's clearest wins. Massive deregulation, single-window clearances, IBC 2016 (bankruptcy reform), GST, and e-governance transformed the business environment." }
-            ]
-          },
-          {
-            section: "JOBS & INCOME",
-            items: [
-              { id: 11, name: "Unemployment Rate", upa: "NSSO data: 2.2% (2011-12); 2.3% (2004-05) on 'usual principal status'. Low but reflected informal economy dominance, not true employment.", nda: "PLFS: 6.1% (2017-18) → improved to 3.2% (2023-24). CMIE: ~7-8% (2018-2024). Different methodologies make comparison hard. Total employment grew 36%.", winner: "TIE", reason: "Methodologies changed making direct comparison unreliable. PLFS shows improvement from 6.1% to 3.2% within NDA itself. Total employment jumped from 47cr to 64cr under NDA. Formal employment clearly expanded." },
-              { id: 12, name: "Labour Force Participation Rate", upa: "LFPR estimated ~55-57% (NSSO historical). Limited data availability for consistent comparison. Women's LFPR was stagnant/declining.", nda: "LFPR improved from ~46.8% (2017-18) to 58.2% (2023-24) per PLFS. Female LFPR also rose from 23% to 41%. Employment rate rose to record levels.", winner: "NDA", reason: "The improvement in both LFPR and female LFPR under NDA is documented and significant. More people — especially women — entered the workforce." },
-              { id: 13, name: "Real Wage Growth", upa: "Real rural wages grew ~4-5% annually in 2006-2012; MGNREGA provided floor wage. Real urban wages also grew. But high inflation ate into nominal gains.", nda: "Multiple reports indicate real wage stagnation 2014-2022. India Ratings 2024 report highlighted stagnant real wages as a structural problem. Some improvement in 2023-24.", winner: "UPA", reason: "Real wage growth was notably better in UPA era, especially rural wages driven by MGNREGA and farm sector boom. NDA era saw nominal gains eroded by inflation in many years." },
-              { id: 14, name: "Formal Employment (EPFO)", upa: "EPFO coverage was limited; formal sector jobs ~2.9 crore added in 10 years (2004-2014). Informal economy dominated.", nda: "EPFO data: 19+ crore new formal subscribers added (2014-2024). ABRY scheme incentivised formal hiring. Total employment in formal sector expanded significantly.", winner: "NDA", reason: "EPFO data clearly shows far greater formalization of employment under NDA. While some of this reflects shifting from informal to formal (not all new jobs), the scale is significant." },
-              { id: 15, name: "Startup Creation", upa: "~450 DPIIT-recognised startups at end of UPA era. No dedicated startup policy. Limited venture capital ecosystem.", nda: "1,40,000+ DPIIT-recognised startups (2024). 111 unicorns. India became world's 3rd largest startup ecosystem. Fund of Funds, Startup India launched 2016.", winner: "NDA", reason: "India's transformation from a near-absent startup ecosystem to the world's 3rd largest is one of the most remarkable NDA achievements. DPIIT registrations grew ~311x." },
-              { id: 16, name: "MSME Growth", upa: "~6.3 crore MSMEs; Credit Guarantee Fund; SIDBI programs. MSME Ministry had limited reach. Some loan support but irregular.", nda: "PM Mudra Yojana: 50+ crore loans sanctioned (avg ~₹50,000). Udyam Portal: 4.7cr+ MSMEs registered formally. Emergency Credit Guarantee (COVID). Cluster development.", winner: "NDA", reason: "The Mudra Yojana is the largest micro-credit program in India's history. Udyam formalisation brought crores of micro-enterprises into the formal fold with access to credit and government schemes." }
-            ]
-          },
-          {
-            section: "INFLATION & COST OF LIVING",
-            items: [
-              { id: 17, name: "CPI Inflation (Average)", upa: "Avg CPI: ~8.1% (2012-2014); UPA-II avg retail inflation: 9.8% (last 3 years); CPI crossed 12% in 2011. Inflation was the defining failure of UPA-II.", nda: "Avg CPI: ~5.1% (2014-2025). Never exceeded 8% (except one month in 2020). June 2025 CPI: 2.1% — 6-year low. RBI inflation targeting framework worked.", winner: "NDA", reason: "CPI inflation management is one of NDA's clearest wins. Average CPI 3 percentage points lower than UPA. The RBI Inflation Targeting framework introduced in 2016 was a structural reform." },
-              { id: 18, name: "Food Inflation", upa: "Food inflation regularly in double digits; avg UPA-II food inflation: ~10.4%. Onion price crises (2010-11, 2013). Poor supply-side management.", nda: "Food inflation avg ~5-6%. Better supply-side interventions (buffer stocks, market interventions). Vegetable price spikes remain challenge but shorter duration.", winner: "NDA", reason: "Substantially better food inflation management. Government interventions in vegetable supply chains, better MSP transmission, and lower overall CPI all contributed to lower food costs." },
-              { id: 19, name: "Fuel Prices", upa: "Petrol was price-controlled, causing under-recoveries. Petrol: ₹40/L (2004) → ₹72/L (2014). Hiked 20+ times. Diesel subsidy created fiscal burden.", nda: "Deregulated petrol/diesel (positive reform). Excise duties raised (revenue generation) then cut in 2021-22. Petrol: ₹72 (2014) → ₹95-105/L (2024). LPG cylinders higher.", winner: "TIE", reason: "UPA kept prices artificially controlled (creating subsidies and shortages). NDA deregulated (correct policy) but overall fuel prices still rose. Both had political price management. Structural reform is NDA's, but prices are higher." },
-              { id: 20, name: "Housing Affordability", upa: "Rajiv Awas Yojana built limited houses. Real estate prices soared in cities 2004-2014. Housing shortage: ~18.78 million units. Affordable housing barely addressed.", nda: "PM Awas Yojana: 4.21 crore rural + 1.18 crore urban houses built (2015-2024). RERA Act 2016 protected homebuyers. Still, urban housing unaffordable in metro cities.", winner: "NDA", reason: "Scale of PM Awas Yojana housing delivery far exceeds UPA's effort. RERA brought accountability to real estate. However, urban metro housing affordability remains a challenge under both." },
-              { id: 21, name: "Purchasing Power", upa: "High inflation undermined nominal income gains. Real MPCE (household expenditure) growth was eroded by ~8%+ inflation. Rural MPCE improved with MGNREGA.", nda: "Lower inflation preserved purchasing power better. HCES 2023-24 shows avg rural MPCE ₹4,122/month and urban ₹6,996/month. Real gains across quintiles.", winner: "NDA", reason: "With CPI 3pp lower on average, NDA's lower inflation effectively boosted real purchasing power. HCES 2023-24 data shows significant real consumption improvement across income groups." }
-            ]
-          },
-          {
-            section: "POVERTY & WELFARE",
-            items: [
-              { id: 22, name: "Poverty Rate", upa: "Poverty reduced from ~37.2% (2004-05) to ~29.5% (2011-12) per Tendulkar methodology. Reduction of ~7.7pp in 7 years. MGNREGA, NFSA were key policies.", nda: "Poverty reduced from ~29.5% (2011-12) to ~11.28% (2022-23) per Niti Aayog MPI (Tendulkar). Reduction of 18.2pp. Both parties dispute credit for different parts of reduction.", winner: "NDA", reason: "The documented reduction is larger in absolute terms under NDA period, though Congress's MGNREGA created the income floor that enabled it. Official data shows sharper decline 2014-2023." },
-              { id: 23, name: "Extreme Poverty (WB $2.15/day)", upa: "World Bank: Extreme poverty ~25.7% (2004) declining to ~16.2% (2011-12). MGNREGA provided income floor. Food Security Act (2013) crucial safety net.", nda: "World Bank 2025: Extreme poverty 16.2% (2011-12) → 2.3% (2022-23). India lifted 171 million out of extreme poverty 2011-2023. Both parties contest credit.", winner: "NDA", reason: "The documented reduction in World Bank extreme poverty line is dramatic under the 2014-2023 NDA period. Saubhagya, Jal Jeevan, PMAY, Ayushman Bharat all contributed, building on MGNREGA foundations." },
-              { id: 24, name: "Access to Electricity", upa: "Rural electrification: ~67% households (2012). Rajiv Gandhi Grameen Vidyutikaran Yojana launched (2005). Progress was slow. Frequent power cuts even in electrified areas.", nda: "Saubhagya scheme: 100% household electrification achieved (April 2019). 2.86 crore new connections in 28 months. 24x7 power still a work in progress in some areas.", winner: "NDA", reason: "Universal household electrification was completed under NDA — a historic achievement. Previous RGGVY scheme under UPA covered villages, not households. Complete coverage is an NDA achievement." },
-              { id: 25, name: "Access to Toilets (ODF)", upa: "Only ~38% rural households had toilets (2012 Census). Nirmal Bharat Abhiyan had limited success. Open defecation was a massive public health issue.", nda: "Swachh Bharat Mission: 11+ crore individual toilets built (2014-2019). India declared ODF (Oct 2019). WHO/UNICEF verified improvements in rural sanitation coverage.", winner: "NDA", reason: "Building 11 crore toilets and achieving ODF status is one of the most significant public health interventions in post-independence India. Scale and speed of implementation is unmatched." },
-              { id: 26, name: "Access to Clean Drinking Water", upa: "NRDWP: ~40% households with piped water supply. Many villages dependent on hand pumps. Water quality testing limited.", nda: "Jal Jeevan Mission (2019): 75%+ rural households with tap water connections by 2024 (from 18%). Target: 100% by 2024 (not fully met but massive progress).", winner: "NDA", reason: "JJM added 12+ crore piped water connections in 4-5 years — one of world's largest water infrastructure programs. Earlier coverage was ~18% rural households vs 75%+ now." },
-              { id: 27, name: "Health Insurance Coverage", upa: "RSBY (Rashtriya Swasthya Bima Yojana): 3.7 crore BPL families. Coverage: ₹30,000/year. Limited to BPL households only.", nda: "Ayushman Bharat PM-JAY (2018): 55 crore beneficiaries (40cr initially + expanded). Coverage: ₹5 lakh/family/year. 1.1 crore hospitalisations covered free.", winner: "NDA", reason: "Ayushman Bharat is the world's largest public health insurance program. Coverage is ~15x larger than RSBY, and benefit amount is 16x higher. Covers both BPL and J-category families." },
-              { id: 28, name: "Malnutrition Rates (Child Stunting)", upa: "NFHS-3 (2005-06): Stunting 47.9%, Wasting 19.8%, Underweight 42.5%. Nutrition programs existed (ICDS) but poorly funded.", nda: "NFHS-5 (2019-21): Stunting 35.5%, Wasting 19.3%, Underweight 32.1%. Improvement continues but pace slow. POSHAN Abhiyan launched. India still has 33% of world's stunted children.", winner: "TIE", reason: "Both periods showed improvement at similar rates. Malnutrition remains critically high under both governments. Neither achieved the scale of change needed. POSHAN (NDA) is promising but slow." }
-            ]
-          },
-          {
-            section: "INFRASTRUCTURE",
-            items: [
-              { id: 29, name: "National Highway Construction", upa: "Network grew from ~65,000 km (2004) to ~79,000 km (2014) — 13,547 km added. Pace: ~12 km/day in final year. NHAI faced land acquisition and financing delays.", nda: "Network grew from ~79,000 km (2014) to ~1,75,000 km (2024) — ~96,000 km added. Pace: 34 km/day (2023-24). Bharatmala program; 100+ km expressways built.", winner: "NDA", reason: "NH construction pace increased from 12 km/day to 34 km/day — a 3x increase. More km of highways added in 10 NDA years than in the preceding 65 years combined. Clear evidence-based win." },
-              { id: 30, name: "Railway Expansion", upa: "Railway capex avg ~₹40,000-45,000 cr/year. New lines added but slow. CAG 2014 flagged 43-month avg delays for bridge rehabilitation. Bullet train concept not progressed.", nda: "Railway capex: ₹2.65 lakh cr (FY25) — 5x increase. 100% electrification by 2024. Vande Bharat trains (75+ sets). Kavach safety system. 508 new stations upgraded (Amrit Bharat).", winner: "NDA", reason: "5x increase in railway capital expenditure has transformed India's rail infrastructure. 100% electrification, Vande Bharat semi-high-speed trains, and Kavach safety system are landmark achievements." },
-              { id: 31, name: "Airport Construction", upa: "74 operational airports (2014). Some expansions (T3 Delhi, Bengaluru new). GMR/GVK PPP model started. Limited greenfield construction.", nda: "148+ operational airports by 2024 — doubled in 10 years. Greenfield: Jewar, Mopa, Navi Mumbai, Ayodhya, Srinagar, Kushinagar airports built. UDAN scheme opened 70+ new routes.", winner: "NDA", reason: "Doubling of operational airports in 10 years with UDAN scheme connecting smaller cities is transformative. India now has the fastest-growing aviation market globally, partly enabled by this infrastructure." },
-              { id: 32, name: "Metro Rail Expansion", upa: "Delhi Metro operational (125 km, 2014). Mumbai Metro Phase 1 partially started. Few other cities in planning stage. Total: ~250 km operational.", nda: "Total metro network: 920+ km (2024) in 20+ cities. Cities added: Bengaluru expanded, Hyderabad, Pune, Nagpur, Kochi, Ahmedabad, Chennai, Kolkata expanded, Lucknow, etc.", winner: "NDA", reason: "India's metro network expanded from ~250 km in 2 cities to 920+ km in 20+ cities — a 4x expansion. This transformed urban mobility in multiple Indian cities." },
-              { id: 33, name: "Rural Road Connectivity (PMGSY)", upa: "PMGSY launched in 2000; ~57% habitations connected by 2014. ~3.8 lakh km rural roads built. Progress was slower than targets; contractor issues and corruption.", nda: "97%+ habitations connected by 2024. ~3 lakh more km added. PMGSY Phase II and III launched. Road quality improved with better monitoring; DRRP app for real-time tracking.", winner: "NDA", reason: "Near-universal rural road connectivity was achieved under NDA, completing what UPA had started. PMGSY was a UPA initiative but final mile coverage was delivered under NDA." },
-              { id: 34, name: "Internet Penetration", upa: "Internet users: ~3.7% (2004) to ~12% (2013). 3G rollout was slow. Broadband penetration minimal. Mobile internet largely absent in rural India.", nda: "Internet users: 12% (2014) to 52%+ (2024). Jio launched 2016 — cheapest data globally. BharatNet: optical fibre to 2 lakh+ villages. UPI: 20B+ transactions/month.", winner: "NDA", reason: "Jio's 2016 launch democratised internet access and is one of the most consequential events in India's digital history. Data costs fell 95%, connecting 700M+ people. BharatNet extended this to rural India." },
-              { id: 35, name: "Mobile Connectivity", upa: "~900 million mobile subscribers by 2014. 2G dominant; 3G launched but limited. Mobile internet nascent. Telecom sector had regulatory issues (2G scam backdrop).", nda: "1.2 billion+ subscribers. 4G revolution (Jio 2016). 5G launched 2022, achieved coverage in 500+ cities fastest in world. Mobile broadband: 650M+ active users.", winner: "NDA", reason: "India's 5G deployment was among the fastest globally. Combined with Jio's 4G revolution and 700MHz spectrum allocation, connectivity transformation under NDA is unmatched." }
-            ]
-          },
-          {
-            section: "EDUCATION",
-            items: [
-              { id: 36, name: "Literacy Rate", upa: "Literacy: 64.8% (2001 Census) → 74% (2011 Census) — 9.2pp improvement in 10 years. SSA and MDM programs expanded. RTE Act (2009) landmark legislation.", nda: "Literacy: 77.7% (NFHS-5, 2021). National Education Policy 2020. Gender gap narrowing. NIPUN Bharat for foundational learning (2021). Adult literacy program relaunched.", winner: "NDA", reason: "Literacy continued improving under NDA. NEP 2020 is the most ambitious education reform since 1986. NIPUN Bharat targets foundational literacy by grade 3. Progress is sustained." },
-              { id: 37, name: "School Enrollment (GER)", upa: "Primary GER: ~103% (2013-14), Elementary: ~100%. RTE Act mandated free schooling. Mid-Day Meal covered 12+ crore children. Secondary GER: ~66%.", nda: "Primary GER maintained above 100%. Secondary GER improved to ~79% (2022-23). Pre-primary GER improved significantly. 'Beti Bachao Beti Padhao' improved girls' enrollment.", winner: "TIE", reason: "Primary enrollment was near-universal under both. Secondary enrollment improved under NDA. RTE (2009) was UPA's foundational achievement. Both governments broadly maintained and extended enrollments." },
-              { id: 38, name: "School Dropout Rate", upa: "Elementary dropout: ~14.9% (2013-14). Secondary dropout: ~40%. Mid-Day Meal helped retention. RTE Act focus on enrollment more than retention.", nda: "Secondary dropout: ~17.5% (2023-24) — dramatic improvement from 40%. Elementary dropout under 2%. PM POSHAN, uniform distribution, improved toilets helped retention.", winner: "NDA", reason: "Reducing secondary dropout from ~40% to ~17.5% is a significant achievement. Better school infrastructure (toilets, electricity) under NDA contributed to improved retention, especially for girls." },
-              { id: 39, name: "Higher Education Enrollment", upa: "GER: ~11.6% (2004) → 18.6% (2013-14). New IITs (6), IIMs (7), NLUs added. Central university expansion. Still below global averages.", nda: "GER: 24.5% (2018-19) → 28.4% (2023-24). 7 more IITs, 6 more IIMs, 15 AIIMS, new IIITs. Total Higher Education institutions grew from 712 (2014) to 1,168 (2022).", winner: "NDA", reason: "Rapid expansion of IITs, IIMs, AIIMS under NDA expanded higher education supply. GER improved from 18.6% to 28.4%, though still below the target of 50% by 2035 (NEP 2020 goal)." },
-              { id: 40, name: "Learning Outcomes (ASER)", upa: "ASER 2013: Only 26.4% of Class 5 students in govt schools could read Class 2 text. Math outcomes equally poor. Quality was the chronic failure of education.", nda: "ASER 2023: Improvement but slow — Class 5 reading ability at govt schools improved to ~43%. Foundational crisis persists. NEP 2020 addresses this but implementation early stage.", winner: "TIE", reason: "Both governments failed on learning outcomes. NDA shows marginal improvement in ASER 2023 vs 2013. India's learning crisis spans decades and political parties. NEP 2020 is potentially transformative but too early to judge." }
-            ]
-          },
-          {
-            section: "HEALTHCARE",
-            items: [
-              { id: 41, name: "Infant Mortality Rate (per 1,000 LB)", upa: "IMR: 57 (2006) → 39 (2014) — reduced by 18 points in 8 years. NRHM (2005) was pivotal. Institutional deliveries rose from 38% to 79%.", nda: "IMR: 39 (2014) → 27 (2021) — reduced by 12 points in 7 years. NMR 26→19. Ayushman Bharat, Pradhan Mantri Surakshit Matritva Abhiyan contributed.", winner: "TIE", reason: "Both governments reduced IMR significantly. UPA's NRHM (2005) was the foundational reform. Rate of decline was similar (about 2 points/year) under both. Continuous improvement is most accurate description." },
-              { id: 42, name: "Maternal Mortality Rate (per 1 lakh LB)", upa: "MMR: 254 (2004-06) → 130 (2014-16) — reduction of 124 points in 10 years. NRHM, JSY (cash incentive for institutional birth) were game-changers.", nda: "MMR: 130 (2014-16) → 97 (2018-20) → 93 (2019-21). 33-point reduction. India is on track for SDG target of <70. Rate of decline slightly lower than UPA years.", winner: "UPA", reason: "NRHM under UPA achieved the largest absolute reduction in MMR — 124 points vs 33-37 under NDA. JSY scheme incentivising institutional births was possibly the most impactful maternal health intervention in India's history." },
-              { id: 43, name: "Life Expectancy", upa: "LE: 63.4 years (2004) → 67.5 years (2014) — gain of 4.1 years in 10 years. NRHM focus on maternal & child health contributed. Gap between male/female narrowed.", nda: "LE: 67.5 (2014) → 70.8 (2021) — gain of 3.3 years in 7 years. COVID caused temporary decline in 2021. Ayushman Bharat coverage helped access.", winner: "TIE", reason: "Both governments extended life expectancy at similar rates (~0.4 years/year). UPA had slightly larger absolute gain over 10 years. Trend is continuous and not clearly attributable to either party alone." },
-              { id: 44, name: "Doctor-to-Population Ratio", upa: "~0.6 doctors per 1,000 population (2012). AIIMS-Delhi modernised. Few new medical colleges. MBBS seats insufficient.", nda: "~1.0 doctors per 1,000 (2024). 6 new AIIMS operational; 8 more underway. MBBS seats doubled to 1,08,940. NMC replaced MCI (2020) improving transparency.", winner: "NDA", reason: "MBBS seats nearly doubled under NDA. Six new AIIMS add tertiary care capacity in underserved regions. Doctor ratio improved significantly though still below WHO recommendation of 1:1,000." },
-              { id: 45, name: "Public Health Spending (% GDP)", upa: "Public health spending: ~1.1-1.2% of GDP. NRHM raised spending from 0.9% to 1.1%. Still critically below WHO's recommended 5%.", nda: "Public health spending: ~1.5-1.6% of GDP (2024). Ayushman Bharat, PM-AB, PMJAY combined with state health missions. Budget allocation nearly doubled in 10 years.", winner: "NDA", reason: "Marginal improvement in health spending as % of GDP. Ayushman Bharat is a major addition. However, both governments are far below adequate spending levels (WHO: 5% GDP). NDA's absolute health budget is significantly larger." }
-            ]
-          },
-          {
-            section: "NATIONAL SECURITY",
-            items: [
-              { id: 46, name: "Number of Terror Attacks (J&K)", upa: "16,463 total violence incidents in J&K (2004-2014). Major attacks: Mumbai 26/11 (2008, 166 dead), Parliament attack aftermath, Maoist violence peaked.", nda: "7,744 total incidents in J&K (2014-2024) — 53% reduction. Surgical strikes (2016), Balakot airstrike (2019). Abrogation of Art. 370 (2019). Maoist incidents down 53%.", winner: "NDA", reason: "A 53% reduction in J&K violence incidents and 80%+ reduction in civilian deaths are significant documented improvements. Proactive anti-terrorism policy (Surgical Strikes) was a departure from UPA's more restrained approach." },
-              { id: 47, name: "Civilian Deaths from Terrorism", upa: "J&K: 1,769 civilian deaths (2004-2014). Maoist civilians: ~4,744 (2004-2014). 26/11 Mumbai: 166. Nationwide terror incidents were frequent (Ahmedabad, Delhi, Jaipur blasts).", nda: "J&K: 344 civilian deaths (2014-2024) — 80% reduction. Maoist civilian deaths: 1,481 (2014-2024) — 69% reduction. No major urban bombing incidents comparable to UPA era.", winner: "NDA", reason: "An 80% reduction in J&K civilian terror deaths and 69% reduction in Maoist civilian deaths are data-backed achievements. No urban bomb blasts of UPA era scale occurred under NDA." },
-              { id: 48, name: "Security Personnel Deaths", upa: "J&K: 1,060 security force deaths (2004-2014). Maoist: 1,824 security force deaths (2004-2014). Total combined: 2,884 security personnel.", nda: "J&K: 576 security force deaths (2014-2024) — 46% reduction. Maoist: 509 (2014-2024) — 72% reduction. Total combined: 1,085 — 62% reduction.", winner: "NDA", reason: "A 62% reduction in combined security forces deaths from terrorism/insurgency is a major improvement in force protection and operational effectiveness under NDA." },
-              { id: 49, name: "Border Security & Incursions", upa: "Multiple Chinese incursions (Depsang 2013, Chumar 2014). Limited border road infrastructure (AK Antony opposed development). Pakistan-sponsored infiltration high.", nda: "Galwan 2020 was most serious India-China clash since 1962; subsequently disengaged at most friction points. Better border roads (BRO budget 4x). Surgical strikes and Balakot rebalanced deterrence with Pakistan.", winner: "NDA", reason: "More assertive border posture under NDA. BRO budget quadrupled; 6,806 km border roads built vs 3,610 km under UPA. Galwan was a setback but subsequent disengagement showed diplomatic management." },
-              { id: 50, name: "Defence Modernization", upa: "Defence budget: ~₹1.5-2.5 lakh cr. Major procurement stuck: MMRCA fighter jet controversy, submarine deals delayed. Limited domestic manufacturing.", nda: "Defence budget: ₹6.22 lakh cr (FY25) — 2.5x increase. Defence FDI: 74%→100% auto route. Defence exports: ₹21,083 cr (FY24) vs ₹686 cr (FY14) — 30x increase. Tejas Mk1A, INS Vikrant commissioned.", winner: "NDA", reason: "Defence exports increased 30x under NDA — a transformative achievement. INS Vikrant (indigenously built carrier), LCA Tejas, Akash missile system deployment all demonstrate growing self-reliance. Idefence budget 2.5x larger." }
-            ]
-          },
-          {
-            section: "CORRUPTION & GOVERNANCE",
-            items: [
-              { id: 51, name: "Major Corruption Scandals", upa: "2G Spectrum: ₹1.76 lakh cr CAG estimated loss. Coalgate: ₹1.86 lakh cr. CWG: ₹70,000 cr. Adarsh Housing: ₹163 cr. ISRO-Devas: ₹2 lakh cr. Helicopter scam: €3,600 cr.", nda: "Rafale controversy: No proven financial irregularity (SC dismissed petition). Electoral Bonds: SC struck down in 2024. GST/demonetisation had cronyism allegations. No mega-scam of UPA scale documented.", winner: "NDA", reason: "UPA's mega-scams (2G, Coalgate, CWG) were the largest in post-independence India by estimated value. NDA had controversies but no proven large-scale corruption in resource allocation. The shift from scam-based allocation to auctions (coal, spectrum) is notable." },
-              { id: 52, name: "Convictions in Corruption Cases", upa: "2G: A. Raja acquitted by special CBI court (2017) — judge said 'scam was imaginary'. Coalgate: Some lower-level convictions (HC Gupta). High-profile convictions were rare.", nda: "Some opposition figures prosecuted (questionable political motivation). CBI, ED, SFIO cases. IBC convictions for financial fraud. Conviction rate remains low for big cases.", winner: "TIE", reason: "India's high-profile corruption conviction record is poor under both governments. UPA's biggest cases ended in acquittals. NDA's prosecutions face charges of political selectivity. IBC improved corporate fraud accountability." },
-              { id: 53, name: "Transparency in Political Funding", upa: "Donation disclosure required above ₹20,000. Cash donations widely used. Black money in elections acknowledged. Limited enforcement. But system was constitutionally functional.", nda: "Electoral Bonds Scheme (2018): Allowed anonymous donations to parties. Supreme Court struck down as unconstitutional (Feb 2024) for violating right to information. Information only revealed under court order.", winner: "UPA", reason: "Electoral Bonds were ruled unconstitutional by the Supreme Court for creating opacity in political funding. Pre-existing system, while imperfect, at least required disclosure. Political funding transparency regressed under NDA." },
-              { id: 54, name: "CAG Audit Findings", upa: "Multiple CAG reports on 2G, Coal, CWG, Army Land irregularities. ₹94,060 cr unspent under welfare schemes. Leakage in subsidies was massive.", nda: "Rafale CAG: findings disputed. DBT reduced leakages significantly — ₹3.5+ lakh cr saved from direct benefit transfers. ₹37,064 cr unspent — much lower than UPA. Subsidy rationalisation.", winner: "NDA", reason: "DBT (Direct Benefit Transfer) eliminated crores of ghost beneficiaries and saved ₹3.5+ lakh cr — the biggest anti-leakage reform in India's history. NDA's unspent welfare funds were 60% lower than UPA's." },
-              { id: 55, name: "Government Service Digitization", upa: "Aadhaar launched (2009) — foundational contribution. UID Authority created. Limited e-governance beyond Aadhaar. G2C digital services barely existed.", nda: "JAM Trinity (Jan Dhan-Aadhaar-Mobile) — game changer. UPI ($15T+ transactions, global model). DigiLocker, CoWIN, GeM portal, UMANG app, e-courts, MyGov, ONDC, GSTN. India Stack recognised globally.", winner: "NDA", reason: "While UPA laid the Aadhaar foundation, NDA built the entire digital governance superstructure on it. UPI is now exported globally. DBT, India Stack, and e-governance transformed citizen services." }
-            ]
-          },
-          {
-            section: "LAW & ORDER",
-            items: [
-              { id: 56, name: "Violent Crime Rate", upa: "IPC Violent crimes: ~1.1-1.2 million cases annually. Crime rate per lakh declining slowly from high levels. Urban violent crime concentrated.", nda: "IPC cognisable crimes registered: NCRB 2022 shows similar trend; technology aided better reporting. Violent crime rate shows marginal decline as % of population.", winner: "TIE", reason: "Violent crime data shows a gradual long-term declining trend that spans multiple governments. No clear party-attributable difference in overall violent crime rates. Better reporting may inflate NDA-era numbers." },
-              { id: 57, name: "Murder Rate (per lakh population)", upa: "Murder rate: ~2.8-3.0 per lakh (2004-2013). NCRB data shows gradual decline. India's murder rate was higher than global average.", nda: "Murder rate: ~2.6-2.8 per lakh (2018-2022). Continued gradual decline. NCRB 2022: 28,522 murders. Rate below 2 per lakh in many states.", winner: "NDA", reason: "The declining trend continued under NDA with marginally lower murder rates. The improvement is modest and part of a long-term trend not clearly party-driven, but data slightly favours NDA period." },
-              { id: 58, name: "Women's Safety", upa: "2012 Nirbhaya gangrape led to major legal reforms (Verma Committee → Criminal Law Amendment Act 2013). NCRB: ~2.44 lakh crimes against women (2012). Under-reporting was high.", nda: "NCRB: Crimes against women rose to 4.45 lakh (2022). Fast Track Special Courts expanded. POCSO enforcement improved. But high-profile cases (Hathras 2020) damaged credibility. Better reporting mechanisms.", winner: "TIE", reason: "Rise in registered crimes under NDA reflects both better reporting systems and possibly actual increases. Fast Track Courts are positive. Structural safety issues persist under both governments. Inconclusive without survey-based data." },
-              { id: 59, name: "Cybercrime Trends", upa: "Cybercrime: ~46,000 cases (2013). Low base — digital economy nascent. Section 66A of IT Act (2000) misused against free speech. Limited cybersecurity infrastructure.", nda: "Cybercrime: ~9.4 lakh+ cases (2023-24) — 20x increase. Driven by digital economy growth, not necessarily worse governance. CERT-In, cybercrime portals, NCIIPC established.", winner: "TIE", reason: "Cybercrime surge is primarily driven by India's digital transformation (700M+ internet users vs 100M under UPA). Raw comparison is unfair. NDA has better cybercrime infrastructure, but absolute numbers are much higher." },
-              { id: 60, name: "Conviction Rates (IPC)", upa: "Overall IPC conviction rate: ~38-43% (2004-2013). Overburdened courts. Limited digitisation of judiciary. Case pendency high.", nda: "Overall IPC conviction rate: improved to ~55-57% (2022). E-courts Mission III underway. Fast Track Courts for POCSO and rape cases. But 5+ crore cases still pending.", winner: "NDA", reason: "Conviction rates improved under NDA, partly due to Fast Track Courts and better evidence management. However, judicial pendency remains a crisis under both governments." }
-            ]
-          },
-          {
-            section: "FOREIGN POLICY",
-            items: [
-              { id: 61, name: "Passport Strength (Henley Index)", upa: "India passport rank: ~70-80 (2004-2014). Visa-free/on-arrival access to ~52-58 countries. Perception of India globally improving.", nda: "India passport rank: ~77-84 (2014-2026). Visa-free/on-arrival access to 58-62 countries. Marginal improvement. Visa-on-arrival expanded modestly.", winner: "TIE", reason: "Passport strength changes slowly. Both governments saw marginal improvements. This metric largely reflects India's global standing which improved under both governments, with no dramatic party-driven change." },
-              { id: 62, name: "Trade Agreements", upa: "ASEAN FTA (2009), India-Japan CEPA, India-South Korea CEPA, India-SAARC cooperation. Several agreements signed but with mixed outcomes.", nda: "India-UAE CEPA (2022), India-Australia ECTA (2022), India-EFTA trade deal (2024). But withdrew from RCEP (2019) — controversial decision. UK-India FTA in progress.", winner: "TIE", reason: "UPA signed more agreements in terms of number; NDA focused on higher-quality deals with key partners but RCEP withdrawal was a significant missed opportunity for regional trade integration." },
-              { id: 63, name: "Strategic Partnerships", upa: "US-India nuclear deal (2008) — landmark. Maintained strategic partnerships with Russia, Japan, ASEAN. Comprehensive strategic partnerships with several nations.", nda: "Quad formalised (India-US-Japan-Australia). I2U2 (India-Israel-UAE-US). 2+2 ministerial with US, Japan, Australia. SCO engagement. AUKUS observer status. Defence partnerships deepened.", winner: "NDA", reason: "NDA's diversification of strategic partnerships, particularly Quad formalisation, is a significant shift in India's foreign policy. India now has more active multilateral security partnerships than at any point in its history." },
-              { id: 64, name: "Global Influence Rankings", upa: "India's global brand ranked ~7-8 (Brand Finance/Monocle). Seen as emerging power, 'reluctant global actor'. Soft power through Bollywood, yoga. Limited decisive global engagement.", nda: "India G20 presidency (2023): successful summit. 'Mother of Democracy' narrative. Yoga Day global. G7 outreach partner. 'Voice of Global South'. IMF/WB board engagement.", winner: "NDA", reason: "India's global brand and diplomatic assertiveness significantly increased under NDA. G20 presidency was a masterclass in global positioning. India is now seen as a decisive, not reluctant, global power." },
-              { id: 65, name: "Diaspora Influence", upa: "Pravasi Bharatiya Divas (annual). Limited engagement with Indian-Americans. Diaspora felt less politically connected to government. Some investment outreach.", nda: "Howdy Modi (Houston, 2019 — 50,000 people). Namaste Trump. Modi-Biden chemistry. Indian-Americans in key positions (VP Kamala Harris of Indian origin, other cabinet members). Systematic diaspora engagement.", winner: "NDA", reason: "NDA's diaspora engagement is qualitatively different — more systematic, high-profile, and politically consequential. The leverage of Indian-Americans in US foreign policy towards India also increased." },
-              { id: 66, name: "International Leadership Roles", upa: "India at G20, BRICS founder. Some UN peacekeeping. IBSA dialogue. G4 (UNSC expansion bid). Limited chairmanships of major multilateral bodies.", nda: "G20 presidency (2023) — expanded to include African Union. SCO chair (2023). ISA (International Solar Alliance) founded. CDRI (Coalition for Disaster Resilient Infrastructure). IPEF participation.", winner: "NDA", reason: "India's expansion of international leadership roles under NDA is unmatched historically. G20 expansion to include AU permanent membership and ISA founding are India-led institutional contributions." }
-            ]
-          },
-          {
-            section: "DEMOCRACY & CIVIL LIBERTIES",
-            items: [
-              { id: 67, name: "Press Freedom Rankings (RSF)", upa: "RSF Rankings: 120 (2004) → 140 (2013). Declined 20 places over 10 years. Section 66A of IT Act used against media. Some journalist intimidation.", nda: "RSF Rankings: 140 (2014) → 157 (2026). Declined further 17+ places over 12 years. India below Pakistan in 2026 rankings. Violence against journalists; media ownership concentration.", winner: "UPA", reason: "Press freedom declined under both governments, but India's absolute ranking is much worse under NDA (157 vs starting at 120 under UPA). RSF specifically cites BJP government's role. Media ownership concentration under NDA is documented." },
-              { id: 68, name: "Internet Shutdowns", upa: "Minimal internet shutdowns — technology was limited and government approach less restrictive. Section 66A misused but physical shutdowns rare.", nda: "India became world's #1 nation for internet shutdowns 2018-2023 (Access Now data). 100s of shutdowns annually. J&K internet shutdown lasted 18 months (Aug 2019 - Feb 2021) — world's longest ever.", winner: "UPA", reason: "India's use of internet shutdowns under NDA is globally unprecedented. The 18-month J&K shutdown is the longest in any democracy's history. This represents a qualitative regression in digital civil liberties." },
-              { id: 69, name: "Freedom of Expression", upa: "Sedition cases existed; Section 66A of IT Act used against criticism. Cartoonist arrested, bloggers jailed. But fewer systematic prosecutions of journalists.", nda: "More UAPA/NSA cases against activists, journalists, academics (Bhima Koregaon; farmers protest). 'Anti-national' discourse amplified. Section 66A struck down (2015) but new IT rules (2021) criticised.", winner: "UPA", reason: "While UPA was no paragon of free expression (Section 66A is UPA legislation), the systematic use of UAPA against journalists, activists, and academics increased substantially under NDA. Multiple reports document this trend." },
-              { id: 70, name: "Judicial Independence", upa: "CJI Balakrishnan asset controversies. Generally restrained judicial-executive tensions. Right to Information Act (2005) was landmark. Limited government interference in judicial appointments.", nda: "'Four judges press conference' (Jan 2018) — unprecedented warning about executive interference. CJI Gogoi sexual harassment controversy, then accepted Rajya Sabha seat. NJAC struck down; collegium debates continue.", winner: "TIE", reason: "Both periods had judicial-executive tensions. UPA's corruption and media freedom issues were different from NDA's. The Supreme Court under NDA has also delivered significant rulings against government (Art 370, Electoral Bonds, NJAC). Genuinely contested." },
-              { id: 71, name: "Electoral Competitiveness", upa: "Competitive elections throughout: 2004 (surprise UPA win), 2009 (comfortable win), 2014 (decisive loss). Healthy opposition. EVMs accepted. State elections competitive.", nda: "2014 (huge mandate), 2019 (larger), 2024 (reduced but retained). INDIA bloc formed as opposition. EVMs controversy persists. State elections mostly competitive. Election Commission independence questioned.", winner: "TIE", reason: "India's elections remain broadly competitive and outcomes have surprised observers. Opposition exists and functions in both eras. EVM controversy has been investigated and addressed. Democracy, while stressed, is functioning under both." }
-            ]
-          },
-          {
-            section: "SOCIAL HARMONY",
-            items: [
-              { id: 72, name: "Communal Violence Statistics", upa: "Major riots: Muzaffarnagar 2013 (62 dead), Kokrajhar 2012 (77 dead), Bhagalpur, Bharatpur (10), Dhule (8). NDTV/RTI data: higher annual death toll from communal violence in UPA years.", nda: "Delhi riots 2020 (53 dead). No riots on scale of Muzaffarnagar or Kokrajhar. RTI/NDTV data shows lower annual communal death toll under NDA. But atmosphere widely perceived as more polarised.", winner: "NDA", reason: "On the metric of deaths from communal violence, NDA data shows lower numbers than UPA. However, critics argue the atmosphere of communal polarisation has worsened, and many incidents go unreported or are classified differently." },
-              { id: 73, name: "Caste Violence (SC/ST Atrocities)", upa: "NCRB: ~33,000-38,000 SC/ST atrocity cases annually (2010-2014). Khairlanji massacre (2006). SC/ST Act enforcement inconsistent.", nda: "NCRB: 50,000-57,000 SC/ST atrocity cases annually (2018-2022). Bhima Koregaon violence (2018). Hathras (2020). SC/ST Amendment Act (2018) strengthened protection after dilution attempt.", winner: "TIE", reason: "Higher case numbers under NDA may reflect both better reporting mechanisms and actual increase. The SC/ST Amendment Act is NDA legislation strengthening the law. Actual safety outcomes are debated. Neither party has resolved caste violence." },
-              { id: 74, name: "Regional Conflict Statistics", upa: "Maoist deaths: 6,568 total (2004-2014). LWE affected 200+ districts. Northeast conflicts high. Manipur unstable. J&K high violence. Naxal belt spread.", nda: "Maoist deaths: 1,990 (2014-2024) — 70% reduction. LWE districts reduced from 200+ to <50. Northeast more peaceful; multiple peace deals. J&K violence halved. Manipur tensions re-emerged (2023).", winner: "NDA", reason: "70% reduction in Maoist/LWE deaths and containment of conflict geography to <50 districts from 200+ is a significant security achievement. Northeast peace accords are multiple and meaningful." },
-              { id: 75, name: "Social Trust (Surveys)", upa: "Lokniti/CSDS data shows high social trust and inter-community interactions. India Human Development Survey data suggests high neighbourhood trust across communities.", nda: "Pew Research (2021): 85%+ Indians say religious groups get along. But survey data also shows more people report Hindu-Muslim tensions as an issue. Polarisation in discourse increased.", winner: "TIE", reason: "Survey data is mixed and methodology-dependent. India's grassroots inter-community relations remain relatively strong by international standards, but elite discourse polarisation is documented under NDA. Hard to definitively score." }
-            ]
-          },
-          {
-            section: "ENVIRONMENT",
-            items: [
-              { id: 76, name: "Air Quality (PM2.5 Levels)", upa: "No systematic national AQI monitoring. Delhi AQI was already poor. CPCB data limited. No NCAP. Crop burning, vehicle emissions unaddressed at national level.", nda: "AQI monitoring expanded to 300+ cities (SAMEER app). NCAP (National Clean Air Programme) launched 2019 — target 40% PM reduction by 2026. Still, India has 9 of world's 10 most polluted cities (IQAir 2024).", winner: "TIE", reason: "Both periods featured poor and worsening air quality. NDA expanded monitoring and launched NCAP (positive step), but actual PM2.5 levels remained dangerously high. Measurement improved under NDA; actual air quality did not." },
-              { id: 77, name: "Renewable Energy Capacity", upa: "Renewable (wind+solar): ~35 GW (2014). National Solar Mission launched (2011). Solar capacity: ~3 GW. Wind: ~22 GW. Progress was slow initially.", nda: "Renewable capacity: 274 GW (2026) — 7x increase. Solar: 150+ GW. Wind: 56+ GW. India ranks 3rd globally in RE capacity. Fastest growing major solar market. 55 GW added in FY26 alone.", winner: "NDA", reason: "India's renewable energy transformation under NDA is among the most impressive globally. Solar capacity grew 50x. The 2030 target of 500 GW is well on track. NDA deserves full credit for this transformation." },
-              { id: 78, name: "Forest Cover", upa: "Forest cover: ~21.05% of geographic area (2001-2013). Remained essentially flat. Some forest diversion for mining/development projects. Forest Rights Act (2006) was important legislation.", nda: "Forest cover: ~21.94% (2021 FSI report). Marginal increase of ~0.89pp. Compensatory afforestation improved. But forest quality (dense vs open) concerns remain. Some forest diversion continued.", winner: "NDA", reason: "Forest cover marginally increased under NDA after being flat under UPA. However, the increase is modest and partly reflects tree plantation in non-forest areas. Both governments approved forest diversions for infrastructure." },
-              { id: 79, name: "Climate Commitments", upa: "Copenhagen (2009): India resisted binding commitments. NAPCC launched (8 national missions including solar, energy efficiency). Position seen as defensive/obstructionist by some.", nda: "Paris Agreement ratified (2016). 450 GW RE by 2030 target. Net Zero by 2070 pledge. G20: led renewable energy tripling pledge. ISA (International Solar Alliance) co-founded. LiFE campaign.", winner: "NDA", reason: "NDA's climate commitments are far more ambitious and credible — backed by actual renewable energy delivery. India's transformation from 'climate obstructionist' to 'climate leader' is one of NDA's most significant foreign policy achievements." }
-            ]
-          }
-        ];
-
-        const SUMMARY_10 = [
-          { id: 1, name: "GDP Growth", upa: "Avg 6.8–7.6% (old series). Strong first term (8.1%), weaker second (5.9%). Global tailwinds helped.", nda: "Avg ~6–6.8%. Pre-COVID on par with UPA. COVID disrupted. India's relative outperformance vs world was better under NDA.", winner: "TIE", reason: "When adjusting for global growth differentials and COVID, both governments achieved similar GDP performance in their respective contexts." },
-          { id: 2, name: "GDP Per Capita", upa: "$635→$1,573 (+148% in 10 yrs). High inflation partially eroded real gains. Real wages improved in UPA-I years.", nda: "$1,573→$2,731 (+74% in 10 yrs). Lower inflation preserved real gains better. PPP per capita shows larger real gains.", winner: "TIE", reason: "Different base effects and different inflation contexts. In real (inflation-adjusted) terms, NDA's lower inflation may have given comparable real per-capita gains despite lower nominal growth." },
-          { id: 3, name: "Unemployment", upa: "NSSO: ~2.2% (2012). Methodology differences make comparison unreliable. Informal employment was high but under-counted.", nda: "PLFS: 6.1% (2017-18) → 3.2% (2023-24). Total employment grew 36% (47cr → 64cr). Formal employment sharply up.", winner: "NDA", reason: "Despite higher PLFS unemployment numbers initially, NDA's formal job creation (19+ crore EPFO additions), startup ecosystem, and LFPR improvement (to 58.2%) show net employment gains." },
-          { id: 4, name: "Inflation", upa: "CPI avg ~8.1% (2012-2014). UPA-II had 22 months of 9%+ inflation. Double-digit food inflation. Economy's biggest failure.", nda: "CPI avg ~5.1% (2014-2025). Food inflation avg ~5-6%. Historic low of 2.1% (June 2025). RBI Inflation Targeting worked.", winner: "NDA", reason: "Clear NDA win. Inflation management under NDA vs UPA is among the most data-backed differences between the two governments. 3 percentage points lower average CPI has real impact on ordinary people." },
-          { id: 5, name: "Poverty Reduction", upa: "Poverty: 37% (2004-05) → 29% (2011-12). MGNREGA, NFSA, ICDS were foundational. High economic growth lifted many.", nda: "Poverty: 29% (2013-14) → 11% (2022-23). DBT, Ayushman, PMAY, electricity, water schemes drove reduction. World Bank confirmed 171M lifted.", winner: "NDA", reason: "The scale of documented poverty reduction 2014-2023 exceeds the UPA period, though UPA's MGNREGA is an indispensable foundation. Direct welfare delivery (DBT eliminating leakage) was NDA's key innovation." },
-          { id: 6, name: "Infrastructure Growth", upa: "Moderate NH construction (12 km/day). PMGSY foundation. NHDP Phase III-VII started. Airport improvements. Railway investment low.", nda: "NH construction: 34 km/day. Airports doubled. Metro in 20+ cities. Railway capex 5x. Rural roads near-universal. Internet revolution.", winner: "NDA", reason: "NDA's infrastructure push is the most visible and largest in independent India. Capital expenditure as % of GDP reached ~3.4% (highest ever). The pace of infrastructure creation is without historical parallel." },
-          { id: 7, name: "Education Outcomes", upa: "RTE Act (2009) — foundational legislation. School enrollment near-universal at primary. But learning outcomes poor (ASER).", nda: "Dropout reduced, higher education expanded. NEP 2020 — most ambitious reform since 1986. Learning outcomes marginally improved.", winner: "NDA", reason: "NDA has better quantitative outcomes (lower dropout, higher GER, more institutions) and NEP 2020 is a structural reform. But learning outcomes crisis persists under both; UPA's RTE laid the foundation." },
-          { id: 8, name: "Healthcare Outcomes", upa: "NRHM (2005) — landmark programme. Fastest IMR/MMR reduction period. Institutional deliveries rose from 38% to 79%. Strong foundation.", nda: "Ayushman Bharat (500M coverage). 15 new AIIMS. MBBS seats doubled. IMR/MMR continued improving. COVID vaccination: 220cr doses (world's largest programme).", winner: "TIE", reason: "UPA's NRHM achieved faster rate of MMR/IMR reduction. NDA's Ayushman Bharat is a massive scale-up in financial protection. Both have genuine, comparable healthcare achievements." },
-          { id: 9, name: "Terrorism & National Security", upa: "Major terror attacks (26/11 2008). High J&K violence. Maoist deaths ~6,568. Urban bomb blasts in multiple cities. Restrained response posture.", nda: "J&K violence -53%. Civilian deaths -80%. Maoist deaths -70%. Surgical Strikes, Balakot airstrike. 30x defence exports growth. Stronger deterrence posture.", winner: "NDA", reason: "NDA's security outcomes are clearly better on virtually all data metrics. Reduction in terrorism deaths, Maoist violence, and stronger conventional deterrence are all documented and significant." },
-          { id: 10, name: "Corruption & Governance", upa: "2G, Coalgate, CWG — largest scandals in post-independence India. Governance paralysis in UPA-II. Policy corruption was systemic. But RTI Act (2005) was landmark.", nda: "No mega-scam of UPA scale. DBT eliminated leakage. Digitisation transformed governance. But electoral bonds undermined political funding transparency. Opposition prosecutions appear selective.", winner: "NDA", reason: "The absence of mega-scams comparable to 2G/Coalgate and the anti-leakage gains from DBT (₹3.5L+ cr saved) put NDA ahead on this metric overall, despite legitimate concerns about political funding transparency and selective enforcement." }
-        ];
-
-        // State
-        let activeFilter = "ALL";
-        let showSummary = false;
-        let expandedRows = new Set();
-        
-        const counts = { NDA: 0, UPA: 0, TIE: 0 };
-        SECTIONS.flatMap(s => s.items).forEach(i => counts[i.winner]++);
-        const total = counts.NDA + counts.UPA + counts.TIE;
-
-        // Render Functions
-        const renderScoreBoard = () => {
-            const data = [
-                { label: "BJP/NDA Wins", key: "NDA", color: "var(--bjp-color)" },
-                { label: "Congress/UPA Wins", key: "UPA", color: "var(--cong-color)" },
-                { label: "Tie / Inconclusive", key: "TIE", color: "var(--tie-color)" }
-            ];
-            document.getElementById('scoreboard').innerHTML = data.map(d => `
-                <div class="score-card" style="border-top: 4px solid ${d.color}">
-                    <div class="score-val" style="color: ${d.color}">${counts[d.key]}</div>
-                    <div class="score-label">${d.label}</div>
-                    <div class="score-sub">${((counts[d.key]/total)*100).toFixed(0)}% of ${total} categories</div>
-                </div>
-            `).join('');
-        };
-
-        const renderFilters = () => {
-            const fData = [
-                { key: "ALL", label: "All 79 Categories" },
-                { key: "NDA", label: `BJP/NDA Wins (${counts.NDA})` },
-                { key: "UPA", label: `Congress/UPA Wins (${counts.UPA})` },
-                { key: "TIE", label: `Ties (${counts.TIE})` }
-            ];
-            document.getElementById('filters').innerHTML = fData.map(f => `
-                <button class="btn ${activeFilter === f.key ? 'active-' + f.key : ''}" onclick="setFilter('${f.key}')">
-                    ${f.label}
+            <button class="icon-btn" id="btn-share" title="Copy Link" aria-label="Share">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            </button>
+            <button class="icon-btn" id="btn-theme" title="Toggle Theme" aria-label="Toggle Theme">
                 </button>
-            `).join('');
-        };
+        </div>
+    </nav>
 
-        const getWinnerBadgeHtml = (winner) => {
-            if (winner === "NDA") return `<span class="winner-badge" style="background: var(--bjp-bg); color: var(--bjp-color); border: 1px solid var(--bjp-color);">BJP/NDA</span>`;
-            if (winner === "UPA") return `<span class="winner-badge" style="background: var(--cong-bg); color: var(--cong-color); border: 1px solid var(--cong-color);">Congress</span>`;
-            return `<span class="winner-badge" style="background: var(--tie-bg); color: var(--tie-color); border: 1px solid var(--tie-color);">TIE</span>`;
-        };
+    <div class="layout-wrapper">
+        <aside class="sidebar" id="sidebar"></aside>
 
-        const renderSummary = () => {
-            const el = document.getElementById('summary-container');
-            if (!showSummary) {
-                el.style.display = 'none';
-                return;
-            }
-            el.style.display = 'block';
-            let html = `
-                <div style="margin-bottom: 24px;">
-                    <h2 style="font-size: 20px; margin-bottom: 16px; display:flex; align-items:center; gap:10px;">
-                        ${SVGS.BAR_CHART} 10-Category Executive Summary
-                    </h2>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>#</th><th>Category</th><th>Congress/UPA (2004–14)</th><th>BJP/NDA (2014–24)</th><th style="text-align: center;">Winner</th><th>Key Reason</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${SUMMARY_10.map(item => `
-                                    <tr>
-                                        <td style="color: var(--text-secondary); font-weight: 700;">${item.id}</td>
-                                        <td style="font-weight: 700;">${item.name}</td>
-                                        <td style="color: #64D2FF; font-size: 12px;">${item.upa}</td>
-                                        <td style="color: #FFD60A; font-size: 12px;">${item.nda}</td>
-                                        <td style="text-align: center;">${getWinnerBadgeHtml(item.winner)}</td>
-                                        <td style="color: var(--text-secondary); font-size: 12px;">${item.reason}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+        <main class="main-content">
+            <div class="hero">
+                <div class="hero-tags">
+                    <span class="hero-pill pill-bjp">BJP / NDA (2014–2024)</span>
+                    <span class="pill-vs">vs</span>
+                    <span class="hero-pill pill-con">Congress / UPA (2004–2014)</span>
+                </div>
+                <h1>India Governance<br>Report Card</h1>
+                <p>An objective, data-driven analysis of 79 indicators across 13 sectors evaluating two decades of governance.</p>
+            </div>
+
+            <div class="scoreboard" id="scoreboard"></div>
+
+            <div class="toolbar">
+                <div class="search-box">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="searchInput" placeholder="Search categories, facts, or keywords..." autocomplete="off">
+                </div>
+                <div class="tool-actions">
+                    <div class="filter-group" id="filters"></div>
+                    <div style="display:flex; gap:16px;">
+                        <button class="text-btn" id="btn-expand-all">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 13 12 18 17 13"></polyline><polyline points="7 6 12 11 17 6"></polyline></svg> Expand All
+                        </button>
+                        <button class="text-btn" id="btn-collapse-all">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 11 12 6 17 11"></polyline><polyline points="7 18 12 13 17 18"></polyline></svg> Collapse
+                        </button>
                     </div>
                 </div>
-            `;
-            el.innerHTML = html;
-        };
+            </div>
 
-        const renderSections = () => {
-            let filtered = activeFilter === "ALL" ? SECTIONS : SECTIONS.map(s => ({
-                ...s, items: s.items.filter(i => i.winner === activeFilter)
-            })).filter(s => s.items.length > 0);
+            <div id="content-container"></div>
+            
+            <div id="verdict-container"></div>
+            
+            <div class="personal-note">
+                <div class="note-flag"></div>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <h2 style="font-size: 24px; font-weight: 800; letter-spacing:-0.5px;">Author's Note</h2>
+                <p>This report architecture is engineered entirely on publicly available data, official government records, credible research institutions, and reputable international sources.</p>
+                <div style="padding: 16px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border); max-width: 500px; margin: 0 auto; font-style: italic; color: var(--text-main); font-weight: 600;">
+                    "I am not a supporter of BJP, but I am against Congress.<br>The numbers don't lie — judge for yourself."
+                </div>
+                <div class="slogan">
+                    <span style="color:#FF9933;">Jai Hind</span>
+                    <span style="color:var(--text-main);">Jai Bharat</span>
+                    <span style="color:#138808;">Jai Shree Ram</span>
+                </div>
+            </div>
+        </main>
+    </div>
 
-            document.getElementById('sections-container').innerHTML = filtered.map(s => {
-                const sNDA = s.items.filter(i => i.winner === "NDA").length;
-                const sUPA = s.items.filter(i => i.winner === "UPA").length;
-                const sTIE = s.items.filter(i => i.winner === "TIE").length;
-                
-                return `
-                <div class="section-card">
-                    <div class="section-header">
-                        ${SVG_ICONS[s.section] || ''}
-                        <h2>${s.section}</h2>
-                        <div class="section-stats">
-                            ${sNDA ? `<span class="stat-badge" style="background:var(--bjp-bg); color:var(--bjp-color)">BJP/NDA: ${sNDA}</span>` : ''}
-                            ${sUPA ? `<span class="stat-badge" style="background:var(--cong-bg); color:var(--cong-color)">Congress: ${sUPA}</span>` : ''}
-                            ${sTIE ? `<span class="stat-badge" style="background:var(--tie-bg); color:var(--tie-color)">Tie: ${sTIE}</span>` : ''}
+<script>
+/* ═══════════════════════════════════════════
+   DATA ARCHITECTURE (79 CATEGORIES)
+═══════════════════════════════════════════ */
+const SECTIONS = [
+{section:"ECONOMY",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`,items:[
+{id:1,name:"GDP Growth Rate",upa:"Avg ~7.6% (old series) / 6.8% (new series); UPA-I: 8.1%, UPA-II: 5.9%. Benefited from pre-2008 global boom when world GDP growth was ~5.6%. Post-2008 slowdown hit hard.",nda:"Avg ~6% (incl. COVID) / 6.8% (excl. FY21). Best year 8.2% (FY24). COVID caused −7.3% in FY21. Global growth was only ~4% during NDA era, yet India outperformed peers.",winner:"TIE",reason:"UPA had marginally higher absolute avg, but NDA outperformed on 'excess growth over global average' (2.9pp vs 2.2pp). COVID massively distorted NDA data. Both averaged ~6.8% in comparable conditions."},
+{id:2,name:"GDP Per Capita",upa:"Grew from ~$635 (2004) to ~$1,573 (2014) — ~148% increase in nominal USD. Real incomes improved significantly during the boom years, though high inflation eroded gains in UPA-II.",nda:"Grew from ~$1,573 (2014) to ~$2,731 (2024) — ~74% increase in nominal USD. PPP per capita grew strongly. Lower inflation preserved real gains better than UPA's nominal gains.",winner:"TIE",reason:"UPA's percentage growth was higher from a lower base with more favorable global conditions. NDA added more absolute dollar value. In real (PPP-adjusted) terms, both are comparable given different inflation environments."},
+{id:3,name:"Size of Economy (Global Rank)",upa:"India moved from 13th (2004, ~$700B) to 10th largest economy (2014, ~$2.1T). Crossed Brazil and Russia. Emerged as a top-10 economy for the first time.",nda:"India moved from 10th (2014, ~$2.1T) to 5th largest economy (2024, ~$3.9T). Surpassed UK and France. Projected to reach 3rd place by 2027–2028, behind only USA and China.",winner:"NDA",reason:"India's leap from 10th to 5th globally is a major milestone. Absolute GDP nearly doubled from $2.1T to $3.9T despite COVID. This ranking shift reflects genuine structural improvement."},
+{id:4,name:"Manufacturing Growth",upa:"Manufacturing grew ~5–7% annually; IIP fluctuated. Deindustrialisation concerns rose in UPA-II. Share of manufacturing in GDP ~14–15%. Limited industrial policy innovation.",nda:"PLI scheme (₹2 lakh cr across 14 sectors). Make in India. Mobile phone manufacturing grew 20x; defence exports up 30x. Manufacturing share improved to ~16–17%. Electronics exports surged.",winner:"NDA",reason:"PLI scheme delivered measurable results in electronics, pharmaceuticals, and defence. Mobile phone production rose from near-zero to $15B+ exports. This is India's most ambitious industrial policy since liberalisation."},
+{id:5,name:"Exports Growth",upa:"Goods exports grew ~69% over 10 years ($83B → $313B). Services exports also grew strongly. Export growth was impressive in UPA-I but decelerating by UPA-II due to global slowdown.",nda:"Services exports: $305B (UPA era) → $709B (NDA era, 2014–24). Goods exports: ~$435B in FY24. India became a $1 trillion merchandise+services exporter for the first time.",winner:"NDA",reason:"Total merchandise+services exports crossed $1T under NDA. Services exports more than doubled. However, goods export % growth was faster under UPA. NDA's absolute value addition is larger."},
+{id:6,name:"Foreign Direct Investment (FDI)",upa:"Total gross FDI inflows: ~$306 billion over 10 years (2004–2014). Peaked after the nuclear deal; declined in UPA-II due to policy paralysis and regulatory uncertainty.",nda:"Total gross FDI inflows: ~$596 billion over 10 years (2014–2024). H1FY25: $42.1B (+25.7% YoY). India ranked among top 3 global FDI destinations for multiple years.",winner:"NDA",reason:"FDI nearly doubled under NDA vs UPA decade. Ease of doing business reforms, FDI policy liberalisation in 100+ sectors, and DPIIT single-window reforms drove the surge."},
+{id:7,name:"Fiscal Deficit (% of GDP)",upa:"Peaked at 6.6% (2009–10) due to crisis stimulus. Avg UPA-II: ~5.9%. Came down to 4.5% by 2013–14 under IMF/market pressure. High deficits directly fuelled the inflation crisis.",nda:"Avg ~3.7% (pre-COVID). COVID spike to 9.2% (FY21); recovered to 5.8% (FY22) → 5.1% (FY24) → targeting 4.5% (FY26). FRBM compliance improved; capital expenditure focused.",winner:"NDA",reason:"Pre-COVID fiscal consolidation under NDA was clearly superior. Despite COVID, NDA managed faster fiscal correction. UPA-II's sustained high deficits were a major cause of the inflation crisis."},
+{id:8,name:"Government Debt-to-GDP Ratio",upa:"General government debt: ~75–78% of GDP. Relatively stable with some reduction from early-2000s peak levels. Fiscal space was being used for subsidies and transfers.",nda:"General government debt: ~80–85% of GDP. Increased significantly post-COVID stimulus and welfare expansion. Higher than UPA-era levels on this specific metric.",winner:"UPA",reason:"On this metric alone, UPA maintained lower debt-to-GDP ratios. NDA's COVID response and expanded welfare spending pushed debt higher. However, quality of spending (capex vs subsidies) improved under NDA."},
+{id:9,name:"Tax Collection Growth",upa:"Direct taxes grew from ₹1.82L cr (FY05) to ₹6.96L cr (FY14). Tax-to-GDP ratio ~10%. Black money economy remained very large. Indirect taxes fragmented and inefficient.",nda:"GST introduced (2017). Total tax collections grew to ₹34+ lakh cr (FY24). Income Tax filers jumped from 3.5 cr to 9.3 cr. Tax-to-GDP ratio improved to ~11–12%. DBT reduced leakage.",winner:"NDA",reason:"GST was India's most ambitious tax reform since 1991. Tax collections grew 4x. Formalisation of the economy brought crores of businesses and individuals into the tax net for the first time."},
+{id:10,name:"Ease of Doing Business",upa:"India ranked 134th in 2013 (World Bank EODB). Bureaucratic red tape; slow project clearances. Coal block allocation via discretion caused massive corruption. Inspector Raj prevalent.",nda:"India improved from 142nd (2014) to 63rd (2019–20) — a 79-place jump. World Bank named India a Top 10 Improver for 3 consecutive years. EODB index discontinued in 2021.",winner:"NDA",reason:"One of NDA's clearest wins. Deregulation, single-window clearances, IBC 2016 (bankruptcy reform), GST, coal/spectrum auctions, and DPIIT reforms transformed the business environment comprehensively."}
+]},
+{section:"JOBS & INCOME",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`,items:[
+{id:11,name:"Unemployment Rate",upa:"NSSO data: 2.2% (2011–12), 2.3% (2004–05) on 'usual principal status'. Low but reflected informal economy dominance — not true employment quality. Methodology captured underemployment poorly.",nda:"PLFS: 6.1% (2017–18) → improved to 3.2% (2023–24). CMIE: ~7–8% (2018–24). Different methodologies make direct comparison unreliable. Total employment grew 36% (47 cr → 64 cr).",winner:"TIE",reason:"Survey methodologies changed fundamentally, making comparison unreliable. PLFS within NDA shows improvement from 6.1% to 3.2%. Total employment rose 36%. Formal employment clearly expanded dramatically."},
+{id:12,name:"Labour Force Participation Rate",upa:"LFPR estimated ~55–57% (NSSO historical). Limited consistent data. Women's LFPR was stagnant or declining throughout UPA era — a major structural failure.",nda:"LFPR improved from ~46.8% (2017–18) to 58.2% (2023–24) per PLFS. Female LFPR rose dramatically from ~23% to ~41%. Employment rate hit record highs in 2023–24.",winner:"NDA",reason:"The dramatic improvement in both overall LFPR and especially female LFPR under NDA is one of the most significant labour market shifts in recent decades. More women entering the workforce is transformative."},
+{id:13,name:"Real Wage Growth",upa:"Real rural wages grew ~4–5% annually (2006–2012). MGNREGA provided a wage floor. Real urban wages also grew. However, high inflation (8–12%) significantly eroded nominal wage gains.",nda:"Multiple reports indicate real wage stagnation 2014–2022. India Ratings 2024 report highlighted persistent stagnant real wages as a structural concern. Some improvement visible in 2023–24.",winner:"UPA",reason:"Real wage growth was notably better in UPA era, especially rural wages driven by MGNREGA and the farm sector boom. NDA saw nominal gains but inflation eroded real purchasing power in many years."},
+{id:14,name:"Formal Employment (EPFO)",upa:"EPFO coverage was limited. Formal sector jobs ~2.9 crore added in 10 years (2004–2014). Informal economy overwhelmingly dominant. Social security coverage very thin.",nda:"EPFO data: 19+ crore new formal subscribers added (2014–2024). ABRY scheme incentivised formal hiring. Social security net expanded. Formalisation of previously informal workers documented.",winner:"NDA",reason:"EPFO data shows far greater formalisation under NDA. While some reflects informal-to-formal shift (not purely new jobs), adding 19+ crore formal workers vs 2.9 crore is an enormous difference in scale."},
+{id:15,name:"Startup Creation",upa:"~450 DPIIT-recognised startups at end of UPA era. No dedicated national startup policy. Limited VC ecosystem. India was not a major startup hub by global standards.",nda:"1,40,000+ DPIIT-recognised startups (2024). 111 unicorns. India became world's 3rd largest startup ecosystem. Startup India (2016), Fund of Funds, SIDBI support, angel tax reforms.",winner:"NDA",reason:"India's transformation from a marginal startup market to the world's 3rd largest ecosystem is extraordinary. DPIIT registrations grew ~311x. 111 unicorns represent enormous wealth and job creation."},
+{id:16,name:"MSME Growth",upa:"~6.3 crore MSMEs. Credit Guarantee Fund; SIDBI programs. MSME Ministry had limited reach. Some loan support but irregular. Priority sector lending existed but enforcement weak.",nda:"PM Mudra Yojana: 50+ crore loans sanctioned (avg ~₹50,000). Udyam Portal: 4.7 cr+ MSMEs registered formally. Emergency Credit Guarantee during COVID saved millions of enterprises.",winner:"NDA",reason:"Mudra Yojana is India's largest micro-credit program in history. Udyam formalisation brought crores of enterprises into formal systems with access to credit and government schemes. Scale is unprecedented."}
+]},
+{section:"INFLATION & COST OF LIVING",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`,items:[
+{id:17,name:"CPI Inflation (Average)",upa:"Avg CPI: ~8.1% full period, 9.8% in last 3 years of UPA-II. CPI crossed 12% in 2011. For 22 of 28 months (Jan 2012–Apr 2014), retail inflation exceeded 9%. Economy's defining failure.",nda:"Avg CPI: ~5.1% (2014–2025). Never exceeded 8% (except one brief month in 2020). June 2025 CPI: 2.1% — a 6-year low. RBI Inflation Targeting Framework (2016) was structural reform.",winner:"NDA",reason:"CPI management is NDA's clearest economic win. Average CPI 3 percentage points lower than UPA. This directly affects the purchasing power of every Indian, especially the poor. RBI framework is lasting reform."},
+{id:18,name:"Food Inflation",upa:"Food inflation regularly in double digits; UPA-II avg: ~10.4%. Multiple onion price crises (2010–11, 2013). Pulses, vegetables unaffordable for months. Supply-side management was poor.",nda:"Food inflation avg ~5–6%. Better supply-side interventions (buffer stocks, market operations). Vegetable price spikes remain a challenge but are shorter in duration and better managed.",winner:"NDA",reason:"Substantially better food inflation management. Lower MSP hikes, better supply-side interventions, and reduced fiscal deficit all contributed. Ordinary families' food bills were more stable under NDA."},
+{id:19,name:"Fuel Prices",upa:"Petrol was price-controlled, causing OMC losses. Petrol: ₹40/L (2004) → ₹72/L (2014). Hiked 20+ times. Diesel and LPG subsidised at huge fiscal cost. Policy was economically distortionary.",nda:"Deregulated petrol/diesel (correct structural reform). Excise duties raised (revenue generation) then cut in 2021–22 under pressure. Petrol: ₹72 (2014) → ₹95–105/L (2024). LPG prices higher.",winner:"TIE",reason:"UPA kept prices artificially low (distortionary but consumers benefited short-term). NDA's deregulation was correct policy but prices rose. Structural reform credit to NDA; price burden also with NDA. Net TIE."},
+{id:20,name:"Housing Affordability",upa:"Rajiv Awas Yojana built limited units. Real estate prices soared in cities 2004–2014 — among the fastest in the world. Housing shortage: ~18.78 million units. Affordable housing barely addressed.",nda:"PM Awas Yojana: 4.21 crore rural + 1.18 crore urban houses built (2015–2024). RERA Act 2016 protected homebuyers. Urban housing unaffordable in metros, but rural/semi-urban addressed.",winner:"NDA",reason:"Scale of PMAY housing delivery is the largest in independent India's history. RERA brought accountability to real estate for the first time. UPA's urban housing surge benefited investors more than the poor."},
+{id:21,name:"Purchasing Power",upa:"High inflation (avg 8%+) significantly undermined nominal income gains. Real MPCE growth was eroded. Rural MPCE improved with MGNREGA, but urban purchasing power suffered in UPA-II.",nda:"Lower avg inflation preserved purchasing power better. HCES 2023–24 shows avg rural MPCE ₹4,122/month and urban ₹6,996/month — significant real improvement across income quintiles.",winner:"NDA",reason:"With CPI 3pp lower on average, NDA's inflation management directly boosted real purchasing power. HCES 2023–24 shows consumption improvements across all groups, suggesting broad-based real income gains."}
+]},
+{section:"POVERTY & WELFARE",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`,items:[
+{id:22,name:"Poverty Rate",upa:"Poverty reduced from ~37.2% (2004–05) to ~29.5% (2011–12) per Tendulkar methodology — 7.7pp in 7 years. MGNREGA, NFSA, and high growth were key drivers.",nda:"Poverty: 29.5% (2011–12) → 11.28% (2022–23) per Niti Aayog MPI. 18.2pp reduction in ~10 years. DBT, PMAY, Saubhagya, Jal Jeevan, Ayushman contributed. Both parties contest credit.",winner:"NDA",reason:"Documented reduction is much larger in absolute terms under NDA period. DBT eliminating leakage (₹3.5L cr+ saved) is NDA's key innovation — welfare spending reached intended beneficiaries far more effectively."},
+{id:23,name:"Extreme Poverty (WB $2.15/day)",upa:"World Bank: Extreme poverty ~25.7% (2004) → ~16.2% (2011–12). MGNREGA provided income floor. NFSA (2013) provided 5 kg grain/month. Important foundational safety net.",nda:"World Bank 2025: Extreme poverty 16.2% (2011–12) → 2.3% (2022–23). India lifted 171 million out of extreme poverty 2011–2023. UN/WB confirmed most of this reduction in post-2014 period.",winner:"NDA",reason:"The documented World Bank extreme poverty reduction is dramatic under 2014–2023 period. Saubhagya, Jal Jeevan, PMAY, free food (PMGKAY) all contributed. UPA's MGNREGA was an indispensable foundation."},
+{id:24,name:"Access to Electricity",upa:"Rural household electrification: ~67% (2012). Rajiv Gandhi Grameen Vidyutikaran Yojana launched (2005) focused on villages, not households. Progress was slow. Frequent power cuts persist.",nda:"Saubhagya scheme: 100% household electrification achieved (April 2019). 2.86 crore new connections in just 28 months. 24x7 reliable power still a work in progress but coverage universal.",winner:"NDA",reason:"Universal household electrification — connecting every home in India to the grid — was completed under NDA. This is a historic achievement. UPA covered villages; NDA covered individual households."},
+{id:25,name:"Access to Toilets (ODF Status)",upa:"Only ~38% rural households had toilets (2012 Census). Nirmal Bharat Abhiyan had limited success. Open defecation was a massive public health emergency affecting ~600 million people.",nda:"Swachh Bharat Mission: 11+ crore individual household toilets built (2014–2019). India declared ODF (October 2019). WHO/UNICEF-verified improvements in rural sanitation coverage.",winner:"NDA",reason:"Building 11 crore toilets in 5 years is one of the most significant public health interventions in post-independence India. The scale and speed far exceed any previous effort. ODF declaration is a milestone."},
+{id:26,name:"Access to Clean Drinking Water",upa:"NRDWP: ~40% households with piped water supply. Many villages dependent on hand pumps with poor water quality. Water quality testing limited. Fluoride/arsenic contamination untreated.",nda:"Jal Jeevan Mission (2019): 75%+ rural households with tap water connections (from 18% in 2019). 12+ crore connections added. Largest water infrastructure program in the world by coverage.",winner:"NDA",reason:"JJM added 12+ crore piped water connections in 4–5 years. Rural tap water coverage jumped from 18% to 75%+ — one of the largest infrastructure achievements in modern history by any developing nation."},
+{id:27,name:"Health Insurance Coverage",upa:"RSBY (Rashtriya Swasthya Bima Yojana): 3.7 crore BPL families. Coverage: ₹30,000/year for 5 members. Limited to BPL households only. Operational in only some states.",nda:"Ayushman Bharat PM-JAY (2018): 55 crore beneficiaries (expanded beyond BPL). Coverage: ₹5 lakh/family/year. 1.1+ crore hospitalisations covered free. World's largest public health insurance program.",winner:"NDA",reason:"Ayushman Bharat is the world's largest public health insurance scheme. Coverage 15x larger than RSBY; benefit amount 16x higher. Covers both BPL and near-poor J-category families. Life-changing for beneficiaries."},
+{id:28,name:"Malnutrition (Child Stunting)",upa:"NFHS-3 (2005–06): Stunting 47.9%, Wasting 19.8%, Underweight 42.5%. ICDS existed but poorly funded and implementation weak. India had among highest child malnutrition rates globally.",nda:"NFHS-5 (2019–21): Stunting 35.5%, Wasting 19.3%, Underweight 32.1%. POSHAN Abhiyan launched 2018. Progress documented but pace slow. India still has ~33% of world's stunted children.",winner:"TIE",reason:"Both periods showed similar rates of improvement in malnutrition metrics. India's malnutrition crisis spans decades and governments. POSHAN Abhiyan is promising but results are slow. Neither government solved it."}
+]},
+{section:"INFRASTRUCTURE",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20"></path><path d="M20 2v20"></path><path d="M4 12h16"></path><path d="M4 6h16"></path><path d="M4 18h16"></path></svg>`,items:[
+{id:29,name:"National Highway Construction",upa:"Network grew from ~65,000 km (2004) to ~79,000 km (2014) — 13,547 km added in 10 years. Pace: ~12 km/day in final year. NHAI faced chronic land acquisition and financing delays.",nda:"Network grew from ~79,000 km (2014) to ~1,75,000 km (2024) — 96,000 km added. Pace: 34 km/day (2023–24). Bharatmala program. 100+ km expressways. PM Gati Shakti framework.",winner:"NDA",reason:"NH construction pace tripled from 12 to 34 km/day. More km added in 10 NDA years than the previous 65 years combined. This is India's most significant infrastructure achievement and has clear statistical evidence."},
+{id:30,name:"Railway Expansion",upa:"Railway capex avg ~₹40,000–45,000 cr/year. New lines added slowly. CAG 2014 flagged 43-month avg project delays. Passenger fares politically frozen for years creating OMC-style losses.",nda:"Railway capex: ₹2.65 lakh cr (FY25) — 5–6x increase. 100% electrification (2024). 75+ Vande Bharat sets running. Kavach anti-collision system. 508 stations upgraded under Amrit Bharat.",winner:"NDA",reason:"5–6x increase in railway capital expenditure has transformed the sector. 100% electrification, Vande Bharat trains, Kavach safety system, and New Delhi–Mumbai, Ahmedabad bullet train projects are landmark."},
+{id:31,name:"Airport Construction",upa:"74 operational airports (2014). T3 Delhi, Bengaluru new airport. GMR/GVK PPP model initiated. Limited greenfield construction. Aviation market was growing but infrastructure lagged.",nda:"148+ operational airports (2024) — doubled in 10 years. Greenfield: Jewar, Mopa, Navi Mumbai, Ayodhya, Srinagar, Kushinagar airports. UDAN scheme opened 70+ new air routes.",winner:"NDA",reason:"Doubling of operational airports in 10 years with UDAN scheme connecting smaller cities is transformative. India is now the fastest-growing aviation market globally, partly enabled by this unprecedented infrastructure."},
+{id:32,name:"Metro Rail Expansion",upa:"Delhi Metro 125 km operational (2014). Mumbai Metro Phase 1 partial. Few cities in planning stage. Total: ~250 km in 2 cities. Urban mobility transformation barely begun.",nda:"Total metro network: 920+ km (2024) in 20+ cities. Expanded to Bengaluru, Hyderabad, Pune, Nagpur, Kochi, Ahmedabad, Chennai, Kolkata, Lucknow, Jaipur and others.",winner:"NDA",reason:"Metro network expanded from ~250 km in 2 cities to 920+ km in 20+ cities — a 4x+ expansion. Transformed urban mobility across India. Hyderabad, Bangalore, and newer metros rival global standards."},
+{id:33,name:"Rural Road Connectivity (PMGSY)",upa:"PMGSY launched 2000; ~57% habitations connected by 2014. ~3.8 lakh km built. Progress was slower than targets. Quality issues and contractor corruption were persistent problems.",nda:"97%+ habitations connected by 2024. ~3 lakh more km added. PMGSY Phase II/III. Road quality improved with DRRP app for real-time tracking. Near-universal rural connectivity achieved.",winner:"NDA",reason:"Near-universal rural road connectivity was achieved under NDA, completing what UPA had started. PMGSY was a UPA initiative, but the final mile coverage to the last remaining habitations was delivered under NDA."},
+{id:34,name:"Internet Penetration",upa:"Internet users: ~3.7% (2004) → ~12% (2013). 3G rollout was slow. Broadband penetration minimal. Mobile internet essentially absent in rural India. Digital divide was vast.",nda:"Internet users: 12% (2014) → 52%+ (2024). Jio launched 2016 — cheapest mobile data in the world. BharatNet: optical fibre to 2 lakh+ villages. UPI: 20B+ transactions/month.",winner:"NDA",reason:"Jio's 2016 launch democratised internet. Data costs fell 95%. 700M+ people connected. BharatNet extended digital infrastructure to rural India. UPI is India's most consequential digital innovation since liberalisation."},
+{id:35,name:"Mobile Connectivity",upa:"~900 million subscribers by 2014. 2G dominant; 3G launched but limited. Mobile internet nascent. 2G Spectrum scam under UPA created regulatory chaos that delayed 4G rollout.",nda:"1.2 billion+ subscribers. Jio's 4G revolution (2016). 5G launched October 2022, achieved coverage in 500+ cities — fastest 5G rollout in world. Mobile broadband: 650M+ active users.",winner:"NDA",reason:"India's 5G deployment was among the fastest globally. Jio's 4G+5G revolution combined with spectrum auctions and BharatNet connectivity transformed India from digital laggard to digital leader."}
+]},
+{section:"EDUCATION",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`,items:[
+{id:36,name:"Literacy Rate",upa:"Literacy: 64.8% (2001 Census) → 74% (2011 Census) — 9.2pp gain. SSA, MDM expanded. RTE Act 2009 was landmark legislation mandating free, compulsory education for 6–14 age group.",nda:"Literacy: 77.7% (NFHS-5, 2021). National Education Policy (NEP) 2020 — most ambitious reform since 1986. NIPUN Bharat (2021) targets foundational literacy by Grade 3.",winner:"NDA",reason:"Literacy continued improving under NDA. NEP 2020 is a structural reform of historic magnitude. NIPUN Bharat targets the root cause of India's learning crisis — foundational skills — rather than just enrollment."},
+{id:37,name:"School Enrollment (GER)",upa:"Primary GER: ~103% (2013–14). Elementary: ~100%. RTE Act mandated free schooling. Mid-Day Meal covered 12+ crore children. Secondary GER: ~66%. Strong foundation built.",nda:"Primary GER maintained above 100%. Secondary GER improved to ~79% (2022–23). Pre-primary GER improved. Beti Bachao Beti Padhao improved girls' enrollment. Uniform distribution expanded.",winner:"TIE",reason:"Primary enrollment was near-universal under both. Secondary enrollment improved under NDA. RTE (2009) was UPA's foundational achievement. Both governments broadly maintained and extended enrollments."},
+{id:38,name:"School Dropout Rate",upa:"Elementary dropout: ~14.9% (2013–14). Secondary dropout: ~40% — a staggeringly high figure. Mid-Day Meal helped retention. RTE focused on enrollment but not sufficiently on retention.",nda:"Secondary dropout: ~17.5% (2023–24) — dramatic improvement from ~40%. Elementary dropout under 2%. PM POSHAN, improved school infrastructure (toilets, electricity) helped retain students.",winner:"NDA",reason:"Reducing secondary dropout from ~40% to ~17.5% is a major achievement. Better school infrastructure (toilets — especially for girls, electricity) under Swachh Bharat and Saubhagya directly contributed to retention."},
+{id:39,name:"Higher Education Enrollment",upa:"GER: ~11.6% (2004) → 18.6% (2013–14). 6 new IITs, 7 new IIMs, NLUs added. Central university expansion. Still well below global averages. Access remained limited.",nda:"GER: 18.6% → 28.4% (2023–24). 7 more IITs, 6 more IIMs, 15 AIIMS, new IIITs. HEI count grew from 712 (2014) to 1,168 (2022). First foreign university campuses (GIFT City) established.",winner:"NDA",reason:"GER improved from 18.6% to 28.4%. Rapid expansion of IITs, IIMs, AIIMS expanded supply. NEP 2020 targets 50% GER by 2035. Institutional growth under NDA is quantitatively superior."},
+{id:40,name:"Learning Outcomes (ASER)",upa:"ASER 2013: Only 26.4% of Class 5 students in govt schools could read a Class 2 text. Math outcomes equally poor. Quality was the chronic, systemic failure of India's education system.",nda:"ASER 2023: Improvement but slow — Class 5 reading in govt schools improved to ~43%. Foundational crisis persists. NEP 2020 and NIPUN Bharat address root causes but implementation is early-stage.",winner:"TIE",reason:"Both governments failed on learning outcomes. India's learning crisis spans decades and parties. NDA shows marginal improvement in ASER 2023 vs 2013. NEP 2020 is potentially transformative but too early to judge."}
+]},
+{section:"HEALTHCARE",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>`,items:[
+{id:41,name:"Infant Mortality Rate (per 1,000 LB)",upa:"IMR: 57 (2006) → 39 (2014) — reduced by 18 points in 8 years. NRHM (2005) was the pivotal reform. Institutional deliveries rose from 38% to 79%. JSY incentivised hospital births.",nda:"IMR: 39 (2014) → 27 (2021) — reduced by 12 points in 7 years. NMR 26→19. Ayushman Bharat and PM Surakshit Matritva Abhiyan contributed. SDG target on track.",winner:"TIE",reason:"Both governments reduced IMR at similar rates (~2 points/year). UPA's NRHM was the foundational reform. Improvement is continuous and spans both governments. The trend cannot be clearly attributed to either alone."},
+{id:42,name:"Maternal Mortality Rate (per 1 lakh LB)",upa:"MMR: 254 (2004–06) → 130 (2014–16) — reduction of 124 points in 10 years. NRHM and JSY (cash incentive for institutional deliveries) were game-changing interventions.",nda:"MMR: 130 (2014–16) → 97 (2018–20) → 93 (2019–21). 33-point reduction. India is on track for SDG target of <70. Rate of absolute decline slightly lower than UPA years.",winner:"UPA",reason:"NRHM under UPA achieved the largest absolute MMR reduction — 124 points vs 33–37 under NDA. JSY incentivising institutional births was possibly the most impactful maternal health intervention in India's history."},
+{id:43,name:"Life Expectancy",upa:"LE: 63.4 years (2004) → 67.5 years (2014) — gain of 4.1 years in 10 years. NRHM focus on maternal and child health drove the improvement. Gender gap in LE narrowed.",nda:"LE: 67.5 (2014) → 70.8 (2021) — gain of 3.3 years in 7 years. COVID caused temporary setback in 2021. Ayushman Bharat improved access for the poorest.",winner:"TIE",reason:"Both governments extended life expectancy at similar rates (~0.4 years/year). UPA had slightly larger absolute gain over 10 years. This is a continuous long-term trend not attributable to either party specifically."},
+{id:44,name:"Doctor-to-Population Ratio",upa:"~0.6 doctors per 1,000 (2012). AIIMS-Delhi was world-class but limited. Very few new medical colleges. MBBS seats insufficient. Medical education controlled by corrupt MCI.",nda:"~1.0 doctors per 1,000 (2024). 6 AIIMS operational; 8 more underway. MBBS seats nearly doubled to 1,08,940. NMC replaced corrupt MCI (2020). Foreign university tie-ups permitted.",winner:"NDA",reason:"MBBS seats nearly doubled under NDA. Six new AIIMS add tertiary care in underserved regions. Doctor ratio improved significantly. NMC replacing MCI is long-overdue institutional reform."},
+{id:45,name:"Public Health Spending (% GDP)",upa:"Health spending: ~1.1–1.2% of GDP. NRHM raised it from 0.9% to 1.1%. Still critically below WHO's recommended 5%. India's public health financing was among the weakest globally.",nda:"Health spending: ~1.5–1.6% of GDP (2024). Ayushman Bharat, PM-ABHIM, state health missions combined. Budget allocation nearly doubled in 10 years in absolute terms.",winner:"NDA",reason:"Marginal but real improvement in health spending share. Ayushman Bharat is a massive addition to health coverage. However, both governments remain far below adequate levels. NDA's absolute budget is significantly larger."}
+]},
+{section:"NATIONAL SECURITY",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,items:[
+{id:46,name:"Terror Attacks (J&K Violence)",upa:"16,463 total violence incidents in J&K (2004–2014). Major attacks: Mumbai 26/11 (2008, 166 dead), Parliament attack, Maoist violence peaked. Urban bomb blasts in Ahmedabad, Delhi, Jaipur, Hyderabad.",nda:"7,744 total incidents (2014–2024) — 53% reduction. Surgical strikes (2016). Balakot airstrike (2019). Art. 370 abrogation (2019). Maoist incidents down 53%. No urban bomb blasts of UPA scale.",winner:"NDA",reason:"53% reduction in J&K violence incidents. Proactive counter-terror policy (Surgical Strikes, Balakot) was a strategic departure from UPA's more restrained 'strategic restraint' approach. Data clearly favours NDA."},
+{id:47,name:"Civilian Deaths from Terrorism",upa:"J&K civilians: 1,769 deaths (2004–2014). Maoist civilians: ~4,744 (2004–2014). 26/11 Mumbai: 166. Nationwide urban bombings killed hundreds. Terrorism was the defining security challenge.",nda:"J&K civilians: 344 deaths (2014–2024) — 80% reduction. Maoist civilians: 1,481 (2014–24) — 69% reduction. No major urban bombing incidents comparable to UPA era occurred under NDA.",winner:"NDA",reason:"80% reduction in J&K civilian terror deaths and 69% in Maoist civilian deaths are data-backed achievements. Absence of major urban bombings under NDA represents a qualitative security improvement."},
+{id:48,name:"Security Personnel Deaths",upa:"J&K: 1,060 security force deaths (2004–2014). Maoist conflict: 1,824 security force deaths (2004–2014). Total combined: 2,884 security personnel killed in counter-terror operations.",nda:"J&K: 576 security force deaths (2014–2024) — 46% reduction. Maoist conflict: 509 (2014–24) — 72% reduction. Total combined: 1,085 — a 62% reduction in security forces deaths.",winner:"NDA",reason:"62% reduction in combined security forces deaths from terrorism/insurgency reflects improved operational effectiveness, better equipment, force protection protocols, and strategic clarity under NDA."},
+{id:49,name:"Border Security & Incursions",upa:"Multiple Chinese incursions (Depsang 2013, Chumar 2014). Limited border road infrastructure — Defence Minister AK Antony publicly opposed road development near border. High Pakistan-sponsored infiltration.",nda:"Galwan 2020 was most serious India-China clash since 1962; subsequently disengaged at most friction points by 2024. BRO budget 4x; 6,806 km border roads built vs 3,610 km under UPA.",winner:"NDA",reason:"More assertive border posture. BRO budget quadrupled; border roads doubled. Surgical Strikes and Balakot rebalanced deterrence with Pakistan. Galwan was a setback but diplomatic disengagement was managed."},
+{id:50,name:"Defence Modernization",upa:"Defence budget ~₹1.5–2.5 lakh cr. Major procurement stuck: MMRCA fighter controversy, submarine deals stalled. 'Phone-a-loan' scam in defence procurement (Agusta Westland). Limited indigenous manufacturing.",nda:"Defence budget: ₹6.22 lakh cr (FY25) — 2.5x increase. Defence exports: ₹21,083 cr (FY24) vs ₹686 cr (FY14) — 30x increase. INS Vikrant, LCA Tejas Mk1A, Akash missile commissioned.",winner:"NDA",reason:"Defence exports 30x increase is transformative. INS Vikrant (first indigenous carrier), LCA Tejas, Akash missile system represent genuine self-reliance. Atma Nirbhar Bharat in defence is a strategic achievement."}
+]},
+{section:"CORRUPTION & GOVERNANCE",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>`,items:[
+{id:51,name:"Major Corruption Scandals",upa:"2G Spectrum: ₹1.76 lakh cr (CAG). Coalgate: ₹1.86 lakh cr. CWG 2010: ₹70,000 cr. Adarsh Housing scam. ISRO-Devas: ₹2 lakh cr. Agusta Westland: €600M. These were the largest scandals in independent India.",nda:"Rafale: No proven financial irregularity (SC dismissed petition 2018). Electoral Bonds: SC struck down (Feb 2024). GST/demonetisation had cronyism allegations. No mega-scam of UPA scale documented.",winner:"NDA",reason:"UPA's mega-scams (2G, Coalgate, CWG) were the largest in post-independence India. NDA shifted resource allocation from discretion to auctions (coal, spectrum) — a systemic reform that prevents scam-type allocations."},
+{id:52,name:"Convictions in Corruption Cases",upa:"2G: A. Raja acquitted (2017). Coalgate: some lower-level convictions. CWG: incomplete proceedings. High-profile convictions were extremely rare despite massive documented corruption.",nda:"Opposition figures prosecuted via ED/CBI — charges of political selectivity persist. IBC improved corporate fraud accountability. High-profile convictions remain rare. Conviction rate low for mega cases.",winner:"TIE",reason:"India's high-profile corruption conviction record is poor under both governments. UPA's biggest cases ended in acquittals. NDA's prosecutions face charges of political selectivity. IBC is a genuine improvement."},
+{id:53,name:"Transparency in Political Funding",upa:"Donations required disclosure above ₹20,000. Cash donations widely used. Black money in elections acknowledged. System was imperfect but constitutionally functional and challenged in courts.",nda:"Electoral Bonds Scheme (2018): Anonymous donations to parties allowed. Supreme Court struck it down as unconstitutional (Feb 2024) for violating right to information. Only revealed under court order.",winner:"UPA",reason:"Electoral Bonds were unanimously struck down by the Supreme Court as unconstitutional for creating opacity. Pre-existing system, while imperfect, required disclosure above threshold. A clear democratic regression under NDA."},
+{id:54,name:"CAG Audit Findings & Leakage",upa:"Multiple scathing CAG reports: 2G, Coal, CWG, Army Land. ₹94,060 cr unspent under welfare schemes. Subsidy leakage was massive — PDS, MGNREGA, LPG all had significant ghost beneficiaries.",nda:"DBT reduced leakages: ₹3.5+ lakh cr saved by eliminating ghost beneficiaries (Govt of India data). ₹37,064 cr unspent under welfare — 60% lower than UPA. Rafale CAG findings disputed.",winner:"NDA",reason:"DBT is the biggest anti-leakage reform in India's history, saving ₹3.5L+ cr. NDA's unspent welfare funds were 60% lower. Elimination of ghost beneficiaries in PDS, LPG, MGNREGA is transformative."},
+{id:55,name:"Government Service Digitization",upa:"Aadhaar launched (2009) — UPA's foundational and historic contribution. UID Authority created. Limited e-governance beyond Aadhaar. G2C digital services were barely functional.",nda:"JAM Trinity (Jan Dhan-Aadhaar-Mobile). UPI: $15T+ transactions, being adopted globally. DigiLocker, CoWIN, GeM portal, UMANG, e-courts, ONDC, GSTN — India Stack recognised worldwide.",winner:"NDA",reason:"While UPA laid the Aadhaar foundation, NDA built the entire digital governance superstructure on it. UPI is now India's most significant global technology contribution. DBT + India Stack transformed citizen services."}
+]},
+{section:"LAW & ORDER",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,items:[
+{id:56,name:"Violent Crime Rate",upa:"IPC Violent crimes: ~1.1–1.2 million cases annually. Crime rate per lakh declining slowly. Urban violent crime concentrated in specific zones. Under-reporting remained a structural issue.",nda:"NCRB 2022 shows continuation of the gradual declining trend. Technology improved reporting. Violent crime rate shows marginal decline as % of population despite larger base.",winner:"TIE",reason:"Violent crime shows a gradual long-term declining trend spanning multiple governments. No clear party-attributable difference exists. Better reporting infrastructure under NDA may slightly inflate numbers."},
+{id:57,name:"Murder Rate (per lakh population)",upa:"Murder rate: ~2.8–3.0 per lakh (2004–2013). NCRB data shows gradual decline. India's murder rate was above the global average and below the regional average.",nda:"Murder rate: ~2.6–2.8 per lakh (2018–2022). Continued gradual decline. NCRB 2022: 28,522 murders. Rate below 2 per lakh in several major states.",winner:"NDA",reason:"The declining trend continued under NDA with marginally lower rates. The improvement is modest and part of a long-term trend not clearly party-driven. Data slightly favours NDA period on absolute numbers."},
+{id:58,name:"Women's Safety",upa:"2012 Nirbhaya gangrape led to major legal reforms: Verma Committee → Criminal Law Amendment Act 2013. NCRB: ~2.44 lakh crimes against women (2012). Under-reporting extremely high.",nda:"NCRB: Crimes against women rose to 4.45 lakh (2022). Fast Track Special Courts for rape/POCSO. POCSO enforcement improved. Hathras 2020 damaged credibility. Better reporting systems.",winner:"TIE",reason:"Rise in registered crimes reflects both better reporting systems and possibly real increases. Fast Track Courts are positive. Structural safety issues persist under both. Inconclusive without robust survey-based data."},
+{id:59,name:"Cybercrime Trends",upa:"Cybercrime: ~46,000 cases (2013). Low base — digital economy nascent. Section 66A of IT Act (2000) misused against free speech. Very limited cybersecurity infrastructure.",nda:"Cybercrime: ~9.4 lakh+ cases (2023–24) — 20x increase. Primarily driven by digital economy explosion. CERT-In, cybercrime portals, NCIIPC established. Cyber fraud a growing concern.",winner:"TIE",reason:"Cybercrime surge is primarily driven by India's digital transformation (700M+ internet users vs 100M under UPA). Raw comparison is unfair. NDA has better cybercrime response infrastructure."},
+{id:60,name:"Conviction Rates (IPC)",upa:"Overall IPC conviction rate: ~38–43% (2004–2013). Overburdened courts. Limited digitisation of judiciary. Case pendency growing. Trials took decades for serious crimes.",nda:"IPC conviction rate improved to ~55–57% (2022). E-courts Mission Phase III underway. Fast Track Courts for POCSO and rape cases. But 5+ crore cases still pending in courts.",winner:"NDA",reason:"Conviction rates improved under NDA partly due to Fast Track Courts and better evidence management. E-courts digitisation improving. However, 5+ crore pending cases remain a systemic crisis under both."}
+]},
+{section:"FOREIGN POLICY",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`,items:[
+{id:61,name:"Passport Strength (Henley Index)",upa:"India passport rank: ~70–80 (2004–2014). Visa-free/on-arrival access to ~52–58 countries. Global perception of India improving. Passport gaining slowly in strength.",nda:"India passport rank: ~77–84 (2014–2026). Visa-free/on-arrival access to 58–62 countries. Marginal improvement. e-Visa reciprocity expanded.",winner:"TIE",reason:"Passport strength changes slowly and reflects broader bilateral relations, not just government policy. Both governments saw marginal improvements. No dramatic party-driven change."},
+{id:62,name:"Trade Agreements",upa:"ASEAN FTA (2009), India-Japan CEPA, India-South Korea CEPA, SAARC cooperation. Several agreements signed. Some, like ASEAN FTA, had mixed outcomes for Indian manufacturers.",nda:"India-UAE CEPA (2022), India-Australia ECTA (2022), India-EFTA trade deal (2024). But India withdrew from RCEP (2019) — a controversial decision. UK-India FTA negotiations ongoing.",winner:"TIE",reason:"UPA signed more agreements numerically. NDA focused on higher-quality bilateral deals but RCEP withdrawal was a significant missed opportunity for regional integration. Net result is approximately equal."},
+{id:63,name:"Strategic Partnerships",upa:"US-India nuclear deal (2008) — a landmark achievement. Maintained partnerships with Russia, Japan, ASEAN. 'Strategic autonomy' as core foreign policy doctrine.",nda:"Quad formalised (India-US-Japan-Australia). I2U2 (India-Israel-UAE-US). 2+2 ministerial with US, Japan, Australia, UK. SCO engagement. AUKUS observer interest. Deeper security partnerships.",winner:"NDA",reason:"Quad formalisation and I2U2 are genuine strategic innovations. India now has more active multilateral security partnerships than at any point in its history. Strategic autonomy evolved into more active global engagement."},
+{id:64,name:"Global Influence Rankings",upa:"India seen as 'emerging power' and 'reluctant global actor'. Soft power via Bollywood, yoga. Limited decisive engagement in global crises. Some perception as difficult to deal with in multilaterals.",nda:"G20 presidency (2023) — masterclass in global positioning. 'Voice of Global South' narrative. India seen as decisive global power. Yoga Day UN adoption. Modi one of world's most recognised leaders.",winner:"NDA",reason:"India's transformation from 'reluctant global actor' to decisive G20 presidency host is qualitative. G20 expansion to include African Union permanent membership is India-led institutional legacy."},
+{id:65,name:"Diaspora Influence",upa:"Pravasi Bharatiya Divas annual events. Limited systematic engagement with Indian-Americans. Diaspora felt politically peripheral. Some investment promotion efforts.",nda:"Howdy Modi (Houston, 2019 — 50,000 people). Namaste Trump. Modi-Biden chemistry. Indian-Americans in key US positions. Systematic diaspora engagement leveraged for foreign policy objectives.",winner:"NDA",reason:"NDA's diaspora engagement is qualitatively different — systematic, high-profile, politically consequential. Leveraging Indian-Americans in US policy towards India has been more effective than any previous government."},
+{id:66,name:"International Leadership Roles",upa:"India at G20, BRICS founder. UN peacekeeping. IBSA dialogue. G4 (UNSC expansion bid). Limited chairing of major multilateral bodies.",nda:"G20 presidency (2023) expanded to include African Union. SCO chair (2023). ISA (International Solar Alliance) co-founded. CDRI co-founded. IPEF participation. Voice of Global South summits.",winner:"NDA",reason:"India's expansion of international leadership roles under NDA is historically unprecedented. G20 expansion to AU permanent membership and ISA founding are India-led institutional contributions to global governance."}
+]},
+{section:"DEMOCRACY & CIVIL LIBERTIES",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>`,items:[
+{id:67,name:"Press Freedom Rankings (RSF)",upa:"RSF Rankings: ~120 (2004) → 140 (2013). Declined 20 places over 10 years. Section 66A of IT Act used against media. Section 66A was passed under UPA and misused.",nda:"RSF Rankings: 140 (2014) → 157 (2026). Declined further 17+ places. India ranked below Pakistan (152) in 2026 rankings. Violence against journalists; media ownership concentration documented.",winner:"UPA",reason:"Press freedom declined under both governments, but India's absolute ranking is much worse under NDA (157 vs 120 starting under UPA). RSF specifically cites NDA government's role. Concentration of media ownership under NDA is documented fact."},
+{id:68,name:"Internet Shutdowns",upa:"Minimal internet shutdowns — the technology was limited and government less inclined to use this tool. Section 66A of IT Act was misused, but physical shutdowns were rare.",nda:"India became world's #1 nation for internet shutdowns (2018–2023, Access Now data). 100s of shutdowns annually for 5+ years. J&K shutdown lasted 18 months (Aug 2019–Feb 2021) — world's longest ever in a democracy.",winner:"UPA",reason:"India's internet shutdowns under NDA are globally unprecedented. The 18-month J&K shutdown is the longest ever in any democracy's history. This is a qualitative regression in digital civil liberties with clear evidence."},
+{id:69,name:"Freedom of Expression",upa:"Sedition cases existed. Section 66A of IT Act used against critics. Cartoonists arrested, bloggers jailed. Real issues, but fewer systematic large-scale prosecutions of civil society.",nda:"More UAPA/NSA cases against journalists, activists, academics (Bhima Koregaon 16, farmers' protest leaders). 'Anti-national' discourse amplified. IT rules (2021) criticised by industry and SC.",winner:"UPA",reason:"While UPA was no paragon (Section 66A is UPA legislation), the systematic use of UAPA against journalists, academics, and activists increased under NDA. Multiple credible international reports document this trend."},
+{id:70,name:"Judicial Independence",upa:"CJI Balakrishnan asset controversies. RTI Act (2005) was landmark. Generally restrained judicial-executive tensions. NJAC not yet attempted. Judiciary more independent from executive.",nda:"'Four judges press conference' (Jan 2018) — unprecedented warning. CJI Gogoi controversy. NJAC struck down by SC. Electoral Bonds struck down. SC also ruled against government on Art 370 (procedures).",winner:"TIE",reason:"Both periods had judicial-executive tensions. UPA had different types of corruption concerns. SC under NDA has delivered significant rulings against the government. Genuinely contested; both had problematic moments."},
+{id:71,name:"Electoral Competitiveness",upa:"Competitive elections: 2004 (surprise UPA win), 2009 (comfortable win), 2014 (decisive loss). EVMs accepted. Healthy functioning opposition. ECI seen as independent.",nda:"2014 (huge mandate), 2019 (larger), 2024 (reduced but retained). INDIA bloc formed. EVM controversy persists despite multiple investigations. ECI independence questioned by opposition.",winner:"TIE",reason:"India's elections remain broadly competitive — outcomes have surprised observers. Opposition exists and functions in both eras. Democracy is stressed but functioning. EVM controversy has not been conclusively proven."}
+]},
+{section:"SOCIAL HARMONY",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,items:[
+{id:72,name:"Communal Violence Statistics",upa:"Major riots: Muzaffarnagar 2013 (62 dead), Kokrajhar 2012 (77 dead), Bhagalpur, Bharatpur, Dhule. RTI/NDTV data: higher annual communal death toll in UPA years based on MHA data.",nda:"Delhi riots 2020 (53 dead). No riots on scale of Muzaffarnagar or Kokrajhar. RTI/NDTV data shows lower annual communal death toll under NDA. But atmosphere widely perceived as more polarised.",winner:"NDA",reason:"On the metric of deaths from communal violence, NDA data shows lower numbers. However, critics argue communal polarisation has worsened significantly and many incidents go unreported. Data-based metric: NDA."},
+{id:73,name:"Caste Violence (SC/ST Atrocities)",upa:"NCRB: ~33,000–38,000 SC/ST atrocity cases annually (2010–2014). Khairlanji massacre (2006). SC/ST Act enforcement was inconsistent and underfunded.",nda:"NCRB: 50,000–57,000 SC/ST atrocity cases annually (2018–2022). Bhima Koregaon (2018), Hathras (2020). SC/ST Amendment Act (2018) strengthened law after Supreme Court dilution.",winner:"TIE",reason:"Higher case numbers under NDA may reflect both better reporting and actual increases. SC/ST Amendment Act strengthened protection. Actual safety outcomes debated. Neither party has resolved caste violence."},
+{id:74,name:"Regional Conflict Statistics",upa:"Maoist deaths: 6,568 total (2004–2014). LWE affected 200+ districts. Northeast conflicts high. Multiple states had active insurgencies. J&K violence high. Naxal belt expanding geographically.",nda:"Maoist deaths: 1,990 (2014–2024) — 70% reduction. LWE districts reduced from 200+ to <50. Multiple Northeast peace deals. J&K violence halved. Manipur tensions re-emerged (2023).",winner:"NDA",reason:"70% reduction in Maoist/LWE deaths and containment to <50 districts from 200+ is a significant security achievement. Multiple Northeast peace accords are meaningful — Bodo, NLFT, ULFA partial deal."},
+{id:75,name:"Social Trust (Survey Data)",upa:"Lokniti/CSDS and IHDS data shows generally high social trust and inter-community interactions. India Human Development Survey suggests high neighbourhood trust across communities.",nda:"Pew Research (2021): 85%+ Indians say religious groups get along. But surveys also show more people report Hindu-Muslim tensions as an issue. Polarisation in political discourse documented.",winner:"TIE",reason:"Survey data is mixed. Grassroots inter-community relations remain relatively strong by international standards. Elite and political discourse polarisation is documented under NDA. Hard to decisively score from data alone."}
+]},
+{section:"ENVIRONMENT",icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>`,items:[
+{id:76,name:"Air Quality (PM2.5 Levels)",upa:"No systematic national AQI monitoring. Delhi AQI was already critically poor. CPCB data limited. No NCAP. Crop burning, vehicle emissions, and industrial pollution largely unaddressed nationally.",nda:"AQI monitoring expanded to 300+ cities (SAMEER app). NCAP (2019) — target 40% PM reduction by 2026. India still has 9 of world's 10 most polluted cities (IQAir 2024). Actual air quality worsened.",winner:"TIE",reason:"Both periods featured poor and worsening air quality. NDA expanded monitoring and launched NCAP. Actual PM2.5 levels remained dangerously high. Infrastructure growth contributed to air quality decline under both."},
+{id:77,name:"Renewable Energy Capacity",upa:"Renewable (wind+solar): ~35 GW (2014). National Solar Mission launched (2011) — visionary but slow. Solar capacity: ~3 GW. Wind: ~22 GW. Target vs reality gap was large.",nda:"Renewable capacity: 274 GW (2026) — 7x increase. Solar: 150+ GW (50x increase!). Wind: 56+ GW. India ranks 3rd globally in RE capacity. 55 GW added in FY26 alone. On track for 500 GW by 2030.",winner:"NDA",reason:"India's renewable energy transformation under NDA is globally remarkable. Solar capacity grew 50x. The 2030 target of 500 GW is on track. India transformed from climate laggard to top-3 global RE nation in one decade."},
+{id:78,name:"Forest Cover",upa:"Forest cover: ~21.05% of geographic area (2001–2013). Remained essentially flat for a decade. Some forest diversion for mining/infrastructure approved. Forest Rights Act (2006) was important.",nda:"Forest cover: ~21.94% (2021 FSI report). Marginal increase of ~0.89pp. Compensatory afforestation fund improved. But concerns about open vs dense forest quality remain.",winner:"NDA",reason:"Forest cover marginally increased under NDA after being flat under UPA. However, the increase is modest and partly reflects plantation in non-forest areas. Both governments approved diversions for infrastructure."},
+{id:79,name:"Climate Commitments",upa:"Copenhagen (2009): India resisted binding commitments. NAPCC launched (8 missions including solar, energy efficiency). India's position seen as defensive/obstructionist by some global observers.",nda:"Paris Agreement ratified (2016). 450 GW RE by 2030. Net Zero by 2070 pledge. G20: led renewable energy tripling pledge. ISA (International Solar Alliance) co-founded. LiFE campaign globally launched.",winner:"NDA",reason:"NDA's climate commitments are far more ambitious and — crucially — backed by actual RE delivery. India transformed from 'climate obstructionist' to 'climate leader' under NDA. A genuine and documented foreign policy achievement."}
+]}
+];
+
+/* ═══════════════════════════════════════════
+   STATE & CORE LOGIC
+═══════════════════════════════════════════ */
+let state = {
+    theme: localStorage.getItem('theme') || 'light',
+    filter: 'ALL',
+    search: '',
+    showSummary: false,
+    expandedRows: new Set()
+};
+
+// Toggle Theme
+function toggleTheme() {
+    state.theme = state.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', state.theme);
+    localStorage.setItem('theme', state.theme);
+    renderThemeIcon();
+}
+
+function renderThemeIcon() {
+    const icon = state.theme === 'light' 
+        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
+        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+    document.getElementById('btn-theme').innerHTML = icon;
+}
+
+// Data Processing
+function getTotals() {
+    let nda = 0, upa = 0, tie = 0;
+    SECTIONS.forEach(s => s.items.forEach(i => {
+        if(i.winner === 'NDA') nda++;
+        if(i.winner === 'UPA') upa++;
+        if(i.winner === 'TIE') tie++;
+    }));
+    return { nda, upa, tie, total: nda + upa + tie };
+}
+
+function getFilteredData() {
+    const query = state.search.toLowerCase();
+    let data = JSON.parse(JSON.stringify(SECTIONS)); // Deep copy
+    
+    return data.map(sec => {
+        sec.items = sec.items.filter(item => {
+            const matchesFilter = state.filter === 'ALL' || item.winner === state.filter;
+            const matchesSearch = query === '' || 
+                                  item.name.toLowerCase().includes(query) || 
+                                  item.upa.toLowerCase().includes(query) || 
+                                  item.nda.toLowerCase().includes(query) ||
+                                  item.reason.toLowerCase().includes(query);
+            return matchesFilter && matchesSearch;
+        });
+        return sec;
+    }).filter(sec => sec.items.length > 0);
+}
+
+// Export CSV
+function exportCSV() {
+    let csv = "ID,Category,Section,Congress/UPA (2004-14),BJP/NDA (2014-24),Winner,Reason\n";
+    SECTIONS.forEach(sec => {
+        sec.items.forEach(i => {
+            let row = [
+                i.id,
+                `"${i.name.replace(/"/g, '""')}"`,
+                `"${sec.section}"`,
+                `"${i.upa.replace(/"/g, '""')}"`,
+                `"${i.nda.replace(/"/g, '""')}"`,
+                `"${i.winner}"`,
+                `"${i.reason.replace(/"/g, '""')}"`
+            ];
+            csv += row.join(",") + "\n";
+        });
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "India_Governance_Report_Card.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Rendering
+function highlightText(text) {
+    if(!state.search) return text;
+    const regex = new RegExp(`(${state.search})`, 'gi');
+    return text.replace(regex, '<span class="highlight">$1</span>');
+}
+
+function renderBadge(winner) {
+    if(winner === 'NDA') return '<span class="winner-pill wp-nda">BJP/NDA</span>';
+    if(winner === 'UPA') return '<span class="winner-pill wp-upa">CONGRESS</span>';
+    return '<span class="winner-pill wp-tie">TIE / MIXED</span>';
+}
+
+function renderSidebar() {
+    const data = getFilteredData();
+    const html = data.map(s => `
+        <a href="#sec-${s.section.replace(/\s+/g, '-')}" class="nav-link">
+            ${s.icon} ${s.section}
+        </a>
+    `).join('');
+    document.getElementById('sidebar').innerHTML = html || '<div class="nav-link">No results found</div>';
+}
+
+function renderScoreboard() {
+    const t = getTotals();
+    const html = `
+        <div class="sc-card" style="border-top: 3px solid var(--bjp)">
+            <div class="sc-num" style="color: var(--bjp)">${t.nda}</div>
+            <div class="sc-lbl">BJP/NDA Wins</div>
+            <div class="sc-bar-wrap"><div class="sc-bar" style="width: ${(t.nda/t.total)*100}%; background: var(--bjp);"></div></div>
+            <div class="sc-sub">${((t.nda/t.total)*100).toFixed(0)}% of 79 categories</div>
+        </div>
+        <div class="sc-card" style="border-top: 3px solid var(--con)">
+            <div class="sc-num" style="color: var(--con)">${t.upa}</div>
+            <div class="sc-lbl">Congress Wins</div>
+            <div class="sc-bar-wrap"><div class="sc-bar" style="width: ${(t.upa/t.total)*100}%; background: var(--con);"></div></div>
+            <div class="sc-sub">${((t.upa/t.total)*100).toFixed(0)}% of 79 categories</div>
+        </div>
+        <div class="sc-card" style="border-top: 3px solid var(--tie)">
+            <div class="sc-num" style="color: var(--tie)">${t.tie}</div>
+            <div class="sc-lbl">Ties / Mixed</div>
+            <div class="sc-bar-wrap"><div class="sc-bar" style="width: ${(t.tie/t.total)*100}%; background: var(--tie);"></div></div>
+            <div class="sc-sub">${((t.tie/t.total)*100).toFixed(0)}% of 79 categories</div>
+        </div>
+    `;
+    document.getElementById('scoreboard').innerHTML = html;
+}
+
+function renderFilters() {
+    const t = getTotals();
+    const filters = [
+        { id: 'ALL', label: 'All 79' },
+        { id: 'NDA', label: `BJP/NDA (${t.nda})` },
+        { id: 'UPA', label: `Congress (${t.upa})` },
+        { id: 'TIE', label: `Ties (${t.tie})` }
+    ];
+    document.getElementById('filters').innerHTML = filters.map(f => `
+        <button class="f-btn ${state.filter === f.id ? 'active-'+f.id : ''}" onclick="updateFilter('${f.id}')">
+            ${f.label}
+        </button>
+    `).join('');
+}
+
+function renderContent() {
+    const data = getFilteredData();
+    const container = document.getElementById('content-container');
+    
+    if (data.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding: 60px; color: var(--text-muted);">No categories match your search.</div>`;
+        return;
+    }
+
+    container.innerHTML = data.map(sec => {
+        let ndaCount = sec.items.filter(i => i.winner === 'NDA').length;
+        let upaCount = sec.items.filter(i => i.winner === 'UPA').length;
+        let tieCount = sec.items.filter(i => i.winner === 'TIE').length;
+        
+        return `
+        <div class="section-block" id="sec-${sec.section.replace(/\s+/g, '-')}">
+            <div class="sec-hd">
+                ${sec.icon}
+                <h2>${sec.section}</h2>
+                <div style="display:flex; gap:8px; margin-left:auto;">
+                    ${ndaCount ? `<span class="sec-badge" style="color:var(--bjp)">BJP: ${ndaCount}</span>` : ''}
+                    ${upaCount ? `<span class="sec-badge" style="color:var(--con)">CONG: ${upaCount}</span>` : ''}
+                    ${tieCount ? `<span class="sec-badge" style="color:var(--tie)">TIE: ${tieCount}</span>` : ''}
+                </div>
+            </div>
+            
+            <div class="grid-container">
+                <div class="grid-header">
+                    <div>#</div>
+                    <div>Category</div>
+                    <div style="color: var(--con);">Congress/UPA (2004–14)</div>
+                    <div style="color: var(--bjp);">BJP/NDA (2014–24)</div>
+                </div>
+                ${sec.items.map(item => {
+                    const isExpanded = state.expandedRows.has(item.id) || state.search.length > 2;
+                    return `
+                    <div class="grid-row ${isExpanded ? 'expanded' : ''}" onclick="toggleRow(${item.id})">
+                        <div class="row-main">
+                            <div class="col-id">${item.id}</div>
+                            <div class="col-title">
+                                <div>
+                                    ${highlightText(item.name)}
+                                    <div class="col-badge" style="display:inline-block; margin-left:8px; vertical-align:middle; text-align:left;">${renderBadge(item.winner)}</div>
+                                </div>
+                                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
+                            <div class="col-text upa">${isExpanded ? '' : highlightText(item.upa.substring(0, 80) + '...')}</div>
+                            <div class="col-text nda">${isExpanded ? '' : highlightText(item.nda.substring(0, 80) + '...')}</div>
+                        </div>
+                        <div class="row-detail">
+                            <div class="row-detail-inner">
+                                <div class="detail-card">
+                                    <div class="detail-label" style="color: var(--gold);">Objective Reason</div>
+                                    <div class="detail-reason">${highlightText(item.reason)}</div>
+                                    <div class="detail-split">
+                                        <div>
+                                            <div class="detail-label" style="color: var(--con);">Congress/UPA Context</div>
+                                            ${highlightText(item.upa)}
+                                        </div>
+                                        <div>
+                                            <div class="detail-label" style="color: var(--bjp);">BJP/NDA Context</div>
+                                            ${highlightText(item.nda)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width: 40px;">#</th>
-                                    <th style="min-width: 150px;">Category</th>
-                                    <th style="color: var(--cong-color); min-width: 220px;">Congress / UPA (2004–14)</th>
-                                    <th style="color: var(--bjp-color); min-width: 220px;">BJP / NDA (2014–24)</th>
-                                    <th style="text-align: center; width: 100px;">Winner</th>
-                                    <th style="min-width: 200px;">Key Reason</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${s.items.map(i => {
-                                    const isExpanded = expandedRows.has(i.id);
-                                    const trunc = (str, len) => !isExpanded && str.length > len ? str.substring(0, len) + "…" : str;
-                                    let bLeft = '3px solid transparent';
-                                    if(i.winner === 'NDA') bLeft = '3px solid var(--bjp-color)';
-                                    if(i.winner === 'UPA') bLeft = '3px solid var(--cong-color)';
-                                    if(i.winner === 'TIE') bLeft = '3px solid var(--tie-color)';
+                    `;
+                }).join('')}
+            </div>
+        </div>`;
+    }).join('');
+}
 
-                                    return `
-                                    <tr class="data-row" data-id="${i.id}" style="border-left: ${bLeft}">
-                                        <td style="color: var(--text-secondary); font-weight: 700;">${i.id}</td>
-                                        <td style="font-weight: 700;">
-                                            <div class="data-title-cell">
-                                                <span>${i.name}</span>
-                                                <span style="color: var(--text-secondary); flex-shrink: 0;">${isExpanded ? SVGS.CHEVRON_UP : SVGS.CHEVRON_DOWN}</span>
-                                            </div>
-                                        </td>
-                                        <td style="color: #64D2FF; font-size: 12px;">${trunc(i.upa, 90)}</td>
-                                        <td style="color: #FFD60A; font-size: 12px;">${trunc(i.nda, 90)}</td>
-                                        <td style="text-align: center;">${getWinnerBadgeHtml(i.winner)}</td>
-                                        <td style="color: var(--text-secondary); font-size: 12px;">${trunc(i.reason, 80)}</td>
-                                    </tr>
-                                    `;
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="tip-text">
-                        ${SVGS.INFO} Click any row to expand full details
-                    </div>
-                </div>
-                `;
-            }).join('');
-        };
+/* ═══════════════════════════════════════════
+   CONTROLLERS
+═══════════════════════════════════════════ */
+function updateFilter(f) { state.filter = f; render(); }
+function toggleRow(id) {
+    if(state.expandedRows.has(id)) state.expandedRows.delete(id);
+    else state.expandedRows.add(id);
+    renderContent();
+}
 
-        // Actions
-        window.setFilter = (f) => {
-            activeFilter = f;
-            renderFilters();
-            renderSections();
-        };
+function expandAll() {
+    SECTIONS.forEach(s => s.items.forEach(i => state.expandedRows.add(i.id)));
+    renderContent();
+}
 
-        document.getElementById('toggleSummaryBtn').addEventListener('click', (e) => {
-            showSummary = !showSummary;
-            const btn = e.currentTarget;
-            const icon = document.getElementById('toggleIcon');
-            const text = document.getElementById('toggleText');
-            
-            if(showSummary) {
-                text.innerText = "Hide 10-Category Summary";
-                icon.innerHTML = `<polyline points="6 9 12 15 18 9"></polyline>`;
-                btn.style.background = "var(--cong-color)";
-                btn.style.color = "#fff";
-            } else {
-                text.innerText = "Show 10-Category Summary Table";
-                icon.innerHTML = `<polyline points="9 18 15 12 9 6"></polyline>`;
-                btn.style.background = "var(--bg-secondary)";
-                btn.style.color = "var(--cong-color)";
-            }
-            renderSummary();
-        });
+function collapseAll() {
+    state.expandedRows.clear();
+    state.search = '';
+    document.getElementById('searchInput').value = '';
+    renderContent();
+}
 
-        document.getElementById('sections-container').addEventListener('click', (e) => {
-            const row = e.target.closest('.data-row');
-            if (row) {
-                const id = parseInt(row.dataset.id);
-                if (expandedRows.has(id)) expandedRows.delete(id);
-                else expandedRows.add(id);
-                renderSections();
+function handleSearch(e) {
+    state.search = e.target.value;
+    render();
+}
+
+function render() {
+    renderSidebar();
+    renderFilters();
+    renderContent();
+    setupScrollSpy();
+}
+
+function setupScrollSpy() {
+    const sections = document.querySelectorAll('.section-block');
+    const links = document.querySelectorAll('.nav-link');
+    
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(sec => {
+            if(window.scrollY >= sec.offsetTop - 200) {
+                current = sec.getAttribute('id');
             }
         });
+        links.forEach(link => {
+            link.classList.remove('active');
+            if(link.getAttribute('href') === `#${current}`) {
+                link.classList.add('active');
+            }
+        });
+        
+        // Progress bar
+        let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        document.getElementById('progress-bar').style.width = (winScroll / height) * 100 + "%";
+    });
+}
 
-        // Initialize
-        renderScoreBoard();
-        renderFilters();
-        renderSections();
-    </script>
+// Initial Boot
+document.documentElement.setAttribute('data-theme', state.theme);
+renderThemeIcon();
+renderScoreboard();
+render();
+
+// Event Listeners
+document.getElementById('btn-theme').addEventListener('click', toggleTheme);
+document.getElementById('btn-export').addEventListener('click', exportCSV);
+document.getElementById('searchInput').addEventListener('input', handleSearch);
+document.getElementById('btn-expand-all').addEventListener('click', expandAll);
+document.getElementById('btn-collapse-all').addEventListener('click', collapseAll);
+document.getElementById('btn-share').addEventListener('click', async () => {
+    try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+    } catch (err) {
+        alert('Failed to copy link.');
+    }
+});
+
+</script>
 </body>
 </html>
